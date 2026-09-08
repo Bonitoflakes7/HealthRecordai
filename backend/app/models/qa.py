@@ -19,3 +19,4 @@ class AskResponse(BaseModel):
     safety_level: str = "normal"
     safety_flags: list[str] = Field(default_factory=list)
     evidence: EvidenceMetadata = Field(default_factory=EvidenceMetadata)
+    query_intent: str = "general"

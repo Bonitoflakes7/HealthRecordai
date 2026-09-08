@@ -104,6 +104,7 @@ def ask_records(payload: AskRequest, request: Request, user: User = Depends(curr
         safety_level=result.get("safety_level", "normal"),
         safety_flags=result.get("safety_flags", []),
         evidence=result.get("evidence", {}),
+        query_intent=result.get("query_intent", "general"),
     )
 
 

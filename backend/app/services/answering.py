@@ -11,7 +11,7 @@ class GroundedAnswerer:
     def __init__(self, model: Any | None = None) -> None:
         self.model = model
 
-    def answer(self, question: str, results: list[SearchResult], history: list[dict] | None = None, source_label: str = "your records", evidence: EvidenceMetadata | None = None) -> tuple[str, str]:
+    def answer(self, question: str, results: list[SearchResult], history: list[dict] | None = None, source_label: str = "your records", evidence: EvidenceMetadata | None = None, query_intent: str | None = None, query_focus: str | None = None) -> tuple[str, str]:
         if not results:
             return "I could not find relevant information in the uploaded records.", "extractive"
         if self.model is not None:
@@ -30,6 +30,7 @@ class GroundedAnswerer:
                 "and prescribed medications from current active medications when the evidence allows. "
                 "Write concise headings and bullets. Cite each bullet or short paragraph once; do not repeat the same citation after every sentence.\n\n"
                 f"Evidence metadata: {evidence_json}\n\n"
+                f"Query intent: {query_intent or 'general'}\n{query_focus or ''}\n\n"
                 f"Recent conversation:\n{recent_history}\n\nQuestion: {question}\n\nEvidence:\n{context}"
             )
             response = self.model.invoke(prompt)

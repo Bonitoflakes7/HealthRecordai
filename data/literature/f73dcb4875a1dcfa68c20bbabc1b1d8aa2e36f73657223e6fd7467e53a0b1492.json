@@ -6,7 +6,10 @@
     "chunk_index": 0,
     "content": "Incidental discovery of neglected 11\u03b2-hydroxylase deficiency causing 46,XX disorder of sex development in a 35-year-old adult: A radiologically driven diagnosis.\n\n11\u03b2-hydroxylase deficiency (11\u03b2-OHD) is the second most common form of congenital adrenal hyperplasia (CAH), characterized by androgen excess, mineralocorticoid-driven hypertension, and hypokalemia. We report a 35-year-old individual with a 46,XX karyotype, registered and raised male since birth, in whom a disorder of sexual development (DSD) had remained unrecognized. Abdominal MRI performed for nonspecific abdominal pain revealed bilateral giant adrenal myelolipomas on macronodular adrenal hyperplasia and a retro-vesical uterus-like structure. On examination, external genitalia showed complete masculinization (Prader stage 5); dedicated pelvic MRI further demonstrated a markedly enlarged uterus with diffuse adenomyosis, in a patient who had never menstruated. Hormonal findings were consistent with classical 11\u03b2-OHD (DOC \u223c140\u00d7 the upper limit of normal, ACTH 12\u00d7 normal, elevated adrenal androgens, suppressed gonadotropins, and absent AMH); CYP11B1 genetic testing, which would provide molecular confirmation, was not available. Glucocorticoid replacement normalized potassium and improved blood pressure, with ongoing multidisciplinary follow-up. This case highlights the radiological phenotype of neglected CAH in adulthood and the role of imaging in characterizing complex DSD when clinical signs alone are insufficient to reach a diagnostic conclusion.",
     "score": 1.0,
-    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42707067/"
+    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42707067/",
+    "document_date": null,
+    "document_type": null,
+    "source_page": null
   },
   {
     "citation_id": "pubmed:42706998",
@@ -15,7 +18,10 @@
     "chunk_index": 0,
     "content": "Global transitions of concomitant patterns and risk factors of cardio-renal-metabolic conditions among the elderly.\n\nCardio-renal-metabolic (CRM) diseases-including ischemic heart disease (IHD), stroke, type 2 diabetes (T2DM), and chronic kidney disease (CKD)-pose major threats to healthy aging. Yet the co-occurrence and evolution of these conditions across regions, and their modifiable risk factors, remain unclear. We analyzed CRM incidence among adults aged \u226555 years in 204 countries and territories from 1990 to 2021. Fifteen multimorbidity patterns were identified based on the population-level coexistence of high CRM incidence. Temporal dynamics were assessed using Bayesian age-period-cohort modeling, and interpretable machine learning was used to screen corresponding risk factors. From 1990 to 2021, global incidence declined for IHD and stroke but rose for T2DM and CKD. High-income regions transitioned from IHD-dominated to T2DM- and CKD-predominant patterns, while North Africa and the Middle East became hotspots for the concurrence of high CRM incidence. Inequalities linked to sociodemographic development widened and are projected to persist through 2035. Declines in IHD and stroke were associated with improvements in blood pressure and lipid control, whereas rises in obesity and trans-fat intake were linked to increases in T2DM and CKD. Regional variation and clustering of these risk factors corresponded to global disparities in incidence trends. Addressing these risk factors was projected to improve healthy life expectancy at age 55, particularly in the Middle East and North Africa. Co-occurrence of CRM conditions is undergoing a transition, characterized by heterogeneous regional risk profiles and widening inequalities. Targeted prevention and policy strategies may be considered to promote healthy longevity worldwide.",
     "score": 1.0,
-    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42706998/"
+    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42706998/",
+    "document_date": null,
+    "document_type": null,
+    "source_page": null
   },
   {
     "citation_id": "pubmed:42706969",
@@ -24,7 +30,10 @@
     "chunk_index": 0,
     "content": "Prognostic Value of Non-dipping Blood Pressure Patterns in Normotensive and Hypertensive Patients With Chronic Kidney Disease: A Systematic Review.\n\nNon-dipping Blood Pressure (BP) patterns, which are highly prevalent among patients with Chronic Kidney Disease (CKD), are independent predictors of cardiovascular risk regardless of average BP levels. However, whether non-dipping independently predicts renal progression beyond overall BP burden remains uncertain. This review followed PRISMA guidelines across PubMed, Scopus, and Cochrane databases. Cohort studies evaluating non-dipping patterns using ambulatory blood pressure monitoring (ABPM) and renal outcomes in CKD were included. Six cohort studies involving 4,303 patients were included. Across studies, renal outcomes appeared more strongly associated with overall BP control than with dipping status alone. Studies comparing normotensive and hypertensive groups showed that hypertensive dippers and non-dippers experienced faster renal decline and higher ESRD rates. Exploratory pooled data demonstrated that non-dipping with uncontrolled hypertension increased ESRD risk (HR 1.42; 95% CI 1.19-1.69; p < 0.0001). Among controlled patients, non-dippers with on-target BP had lower renal risk than dippers above target. The findings suggest that the prognostic significance of non-dipping may depend on overall blood pressure control rather than dipping status alone. Among patients with uncontrolled hypertension, non-dippers appeared to be at greater risk of renal progression than dippers. Among patients with uncontrolled hypertension, non-dippers appeared to be at greater risk of renal progression than dippers. These findings suggest that the prognostic impact of nondipping may be influenced by overall blood pressure control and highlight the importance of achieving adequate 24-hour blood pressure control in patients with CKD.",
     "score": 1.0,
-    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42706969/"
+    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42706969/",
+    "document_date": null,
+    "document_type": null,
+    "source_page": null
   },
   {
     "citation_id": "pubmed:42706746",
@@ -33,7 +42,10 @@
     "chunk_index": 0,
     "content": "Composition-Tuned Hydrogel Iontronic Patch With a Shared Electrode for Dual-Mode Pressure and Moisture-Electric Sensing in Wearable Health Monitoring.\n\nDual-mode wearable patches usually stack discrete sensing and energy modules made from dissimilar materials, which increases thickness and limits skin conformability. Here we report a hydrogel iontronic patch, 1.56\u00a0mm thick, in which both pressure sensing and moisture-electric signaling arise from a single H3PO4/ZnCl2/poly(vinyl alcohol) hydrogel by tuning the ZnCl2-to-H3PO4 ratio. The two functional layers share one Zn foil as a common internal electrode, merging two device stacks into a single compact unit while keeping the channels electrically independent. The pressure-sensing layer delivers a sensitivity of up to 0.60\u00a0nF kPa-1 with a measurement range extending to 2\u00a0MPa with stable response across 10,000 cycles. The moisture-electric layer generates about 0.8\u00a0V at 90% relative humidity and remains stable for over 100\u00a0h. The pressure channel captures arterial pulse, respiration, and joint motion, while the moisture channel tracks breathing- and perspiration-related humidity. Coupled with a one-dimensional convolutional neural network, the multichannel pressure output recognizes five representative tennis strokes, with cross-subject validation on five additional volunteers achieving 92.8% mean accuracy, offering a material-level route toward thinner, skin-conformable wearable healthcare.",
     "score": 1.0,
-    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42706746/"
+    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42706746/",
+    "document_date": null,
+    "document_type": null,
+    "source_page": null
   },
   {
     "citation_id": "pubmed:42706709",
@@ -42,6 +54,9 @@
     "chunk_index": 0,
     "content": "Primary Aldosteronism Subtype Diagnosis: Adrenal Venous Sampling vs. CXCR4 PET CT.\n\nTo explore the clinical value of adrenal venous sampling (AVS) and CXCR4-directed 68Ga-pentixafor PET/CT in the subtype diagnosis of primary aldosteronism (PA), with postsurgical blood pressure control and biochemical cure as primary endpoints, and to compare the accuracy and practicability of the two methods. A retrospective cohort study was conducted in PA patients undergoing unilateral adrenalectomy at West China Hospital between February 2023 and June 2025. Patients were divided into the AVS and CXCR4 imaging groups. The primary outcome was the clinical and biochemical success rate according to the Primary Aldosteronism Surgical Outcome (PASO) criteria. In the subgroup with both procedures, AVS was considered the reference standard to assess the diagnostic efficacy of CXCR4. A total of 160 patients completed the trial. According to the PASO criteria, the total biochemical success rate was 93.1%, among which the complete biochemical success rate in the AVS group was 84.1%, and in the CXCR4 group it was 93.1% (p\u2009=\u20090.091); the total clinical success rate was 82.5%, with a complete clinical success rate of 40.9% in the AVS group and 30.3% in the CXCR4 group (p\u2009=\u20090.412). There were no statistically significant differences between the two groups. In 16 patients with both examinations, CXCR4 showed a sensitivity of 70.0%, specificity of 83.3%, accuracy of 75.0%, and moderate agreement with AVS. CXCR4 showed no statistical difference from AVS in diagnostic and prognostic outcomes in this study. However, discordance in multinodular disease indicates that molecular imaging cannot fully reflect the heterogeneity of aldosterone secretion. This finding requires verification in a larger cohort.",
     "score": 1.0,
-    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42706709/"
+    "source_url": "https://pubmed.ncbi.nlm.nih.gov/42706709/",
+    "document_date": null,
+    "document_type": null,
+    "source_page": null
   }
 ]
