@@ -200,6 +200,7 @@ async def create_record(
         owner_id,
         document_date=response.structured.document_date.isoformat() if response.structured and response.structured.document_date else None,
         document_type=response.structured.document_type if response.structured else None,
+        page_texts=result.get("page_texts"),
     )
     request.app.state.audit_store.record(user.id, "record.upload", "record", summary.id, metadata={"size_bytes": summary.size_bytes, "status": response.status})
     return response

@@ -42,3 +42,11 @@ def test_longitudinal_search_returns_deterministic_completeness_metadata(tmp_pat
     assert metadata.earliest_record_date == "2024-01-14"
     assert metadata.latest_record_date == "2025-03-11"
     assert metadata.latest_record_id == "record-2"
+
+
+def test_index_search_returns_source_page_for_page_aware_records(tmp_path):
+    index = LocalRecordIndex(tmp_path / "chunks.json", chunk_size=1000)
+    index.index_record("record-1", "multi.pdf", "", page_texts=["Assessment: back pain", "Medication: Ibuprofen 200 mg"])
+
+    result = index.search("Ibuprofen")[0]
+    assert result.source_page == 2

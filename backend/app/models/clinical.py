@@ -17,6 +17,7 @@ DocumentType = Literal[
 class DocumentSection(BaseModel):
     heading: str
     text: str
+    source_page: int | None = None
 
 
 class Observation(BaseModel):
@@ -25,12 +26,14 @@ class Observation(BaseModel):
     unit: str | None = None
     observed_on: date | None = None
     source_text: str
+    source_page: int | None = None
 
 
 class Condition(BaseModel):
     name: str
     status: str = "documented"
     source_text: str
+    source_page: int | None = None
 
 
 class Medication(BaseModel):
@@ -42,6 +45,7 @@ class Medication(BaseModel):
     action: str = "documented"
     status: str = "unknown"
     source_text: str
+    source_page: int | None = None
 
 
 class Investigation(BaseModel):
@@ -49,12 +53,14 @@ class Investigation(BaseModel):
     status: str = "documented"
     result: str | None = None
     source_text: str
+    source_page: int | None = None
 
 
 class Procedure(BaseModel):
     name: str
     status: str = "documented"
     source_text: str
+    source_page: int | None = None
 
 
 class DateCandidate(BaseModel):
@@ -62,6 +68,7 @@ class DateCandidate(BaseModel):
     label: str | None = None
     source_text: str
     confidence: str = "explicit"
+    source_page: int | None = None
 
 
 class ClinicalEvent(BaseModel):
@@ -70,6 +77,7 @@ class ClinicalEvent(BaseModel):
     title: str
     details: str | None = None
     source_text: str
+    source_page: int | None = None
 
 
 class NormalizedDocument(BaseModel):

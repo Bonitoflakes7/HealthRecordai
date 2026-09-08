@@ -15,6 +15,7 @@ class IngestionState(TypedDict, total=False):
     source_path: str
     source_type: SourceType
     text: str
+    page_texts: list[str]
     structured: dict[str, Any]
     error: str
 
@@ -28,16 +29,16 @@ def build_ingestion_graph(
 
     def extract(state: IngestionState) -> IngestionState:
         try:
-            text = document_extractor.extract(
-                path=Path(state["source_path"]),
-                source_type=state["source_type"],
-            )
-            return {"text": text}
+            if hasattr(document_extractor, "extract_with_pages"):
+                extracted = document_extractor.extract_with_pages(Path(state["source_path"]), state["source_type"])
+                return {"text": extracted.text, "page_texts": extracted.pages}
+            text = document_extractor.extract(path=Path(state["source_path"]), source_type=state["source_type"])
+            return {"text": text, "page_texts": [text]}
         except (ExtractionError, UnicodeDecodeError) as exc:
             return {"error": str(exc)}
 
     def normalize(state: IngestionState) -> IngestionState:
-        structured = document_normalizer.normalize(state["record_id"], state["text"])
+        structured = document_normalizer.normalize(state["record_id"], state["text"], page_texts=state.get("page_texts"))
         return {"structured": structured.model_dump(mode="json")}
 
     def after_extract(state: IngestionState) -> Literal["normalize", END]:

@@ -17,10 +17,10 @@ class DocumentNormalizer:
         ("hba1c", re.compile(r"\bhba1c\s*[:=]?\s*(\d+(?:\.\d+)?)\s*%?\b", re.I), "%"),
     )
 
-    def normalize(self, record_id: str, text: str) -> NormalizedDocument:
+    def normalize(self, record_id: str, text: str, page_texts: list[str] | None = None) -> NormalizedDocument:
         cleaned = text.strip()
         date_candidates = self._date_candidates(cleaned)
-        return NormalizedDocument(
+        document = NormalizedDocument(
             record_id=record_id,
             document_type=self._classify(cleaned),
             title=self._title(cleaned),
@@ -34,6 +34,29 @@ class DocumentNormalizer:
             procedures=self._procedures(cleaned),
             clinical_events=self._clinical_events(cleaned, date_candidates),
         )
+        return self._attach_pages(document, page_texts)
+
+    @staticmethod
+    def _attach_pages(document: NormalizedDocument, page_texts: list[str] | None) -> NormalizedDocument:
+        if not page_texts:
+            return document
+
+        def page_for(source_text: str | None) -> int | None:
+            if not source_text:
+                return None
+            normalized_source = " ".join(source_text.split()).casefold()
+            for number, page in enumerate(page_texts, start=1):
+                if normalized_source and normalized_source in " ".join(page.split()).casefold():
+                    return number
+            return None
+
+        document.sections = [section.model_copy(update={"source_page": page_for(section.text)}) for section in document.sections]
+        for field in ("observations", "conditions", "medications", "investigations", "procedures"):
+            items = getattr(document, field)
+            setattr(document, field, [item.model_copy(update={"source_page": page_for(item.source_text)}) for item in items])
+        document.date_candidates = [item.model_copy(update={"source_page": page_for(item.source_text)}) for item in document.date_candidates]
+        document.clinical_events = [item.model_copy(update={"source_page": page_for(item.source_text)}) for item in document.clinical_events]
+        return document
 
     @staticmethod
     def _classify(text: str) -> DocumentType:

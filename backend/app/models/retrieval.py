@@ -11,6 +11,7 @@ class SearchResult(BaseModel):
     source_url: str | None = None
     document_date: str | None = None
     document_type: str | None = None
+    source_page: int | None = None
 
 
 class SearchResponse(BaseModel):

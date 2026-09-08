@@ -66,3 +66,15 @@ def test_normalizer_preserves_multiple_dates_and_builds_clinical_events():
     assert [str(item.value) for item in document.date_candidates] == ["2024-01-14", "2024-03-03", "2024-06-18"]
     assert any(item.event_type == "condition" and item.event_date.isoformat() == "2024-01-14" for item in document.clinical_events)
     assert any(item.event_type == "medication" and item.event_date.isoformat() == "2024-01-14" for item in document.clinical_events)
+
+
+def test_normalizer_attaches_page_provenance():
+    document = DocumentNormalizer().normalize(
+        "record-6",
+        "Assessment\nPersistent back pain.\n\nMedication Started: Ibuprofen 200 mg as needed.",
+        page_texts=["Assessment\nPersistent back pain.", "Medication Started: Ibuprofen 200 mg as needed."],
+    )
+
+    assert document.conditions[0].source_page == 1
+    assert document.medications[0].source_page == 2
+    assert document.clinical_events[0].source_page == 1

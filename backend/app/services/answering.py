@@ -16,7 +16,7 @@ class GroundedAnswerer:
             return "I could not find relevant information in the uploaded records.", "extractive"
         if self.model is not None:
             context = "\n\n".join(
-                f"[{item.citation_id} | date={item.document_date or 'unknown'} | type={item.document_type or 'unknown'}] {item.content}"
+                f"[{item.citation_id} | page={item.source_page or 'unknown'} | date={item.document_date or 'unknown'} | type={item.document_type or 'unknown'}] {item.content}"
                 for item in results
             )
             recent_history = "\n".join(f"{item['role']}: {item['content']}" for item in (history or [])[-6:])
@@ -35,7 +35,7 @@ class GroundedAnswerer:
             response = self.model.invoke(prompt)
             return self._content_text(getattr(response, "content", response)), "llm"
 
-        excerpts = "\n".join(f"[{item.citation_id}] {item.content}" for item in results)
+        excerpts = "\n".join(f"[{item.citation_id} | page={item.source_page or 'unknown'}] {item.content}" for item in results)
         return f"Relevant excerpts from {source_label}:\n{excerpts}", "extractive"
 
     @staticmethod

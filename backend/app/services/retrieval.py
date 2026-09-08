@@ -16,8 +16,8 @@ class LocalRecordIndex:
         self.index_path.parent.mkdir(parents=True, exist_ok=True)
         self.chunk_size = chunk_size
 
-    def index_record(self, record_id: str, filename: str, text: str, owner_id: str = "dev-user", document_date: str | None = None, document_type: str | None = None) -> int:
-        documents = self._chunk(record_id, filename, text, owner_id, document_date, document_type)
+    def index_record(self, record_id: str, filename: str, text: str, owner_id: str = "dev-user", document_date: str | None = None, document_type: str | None = None, page_texts: list[str] | None = None) -> int:
+        documents = self._chunk(record_id, filename, text, owner_id, document_date, document_type, page_texts)
         existing = [item for item in self._read() if item["metadata"].get("record_id") != record_id]
         existing.extend(self._serialize(document) for document in documents)
         self.index_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
@@ -60,6 +60,7 @@ class LocalRecordIndex:
                     score=round(score, 4),
                     document_date=metadata.get("document_date"),
                     document_type=metadata.get("document_type"),
+                    source_page=metadata.get("source_page"),
                 )
             )
         return results
@@ -73,7 +74,7 @@ class LocalRecordIndex:
         results: list[SearchResult] = []
         for item in items[: max(1, min(limit, 100))]:
             metadata = item["metadata"]
-            results.append(SearchResult(citation_id=f"{metadata['record_id']}#chunk-{int(metadata['chunk_index'])}", record_id=metadata["record_id"], filename=metadata["filename"], chunk_index=int(metadata["chunk_index"]), content=item["page_content"], score=1.0, document_date=metadata.get("document_date"), document_type=metadata.get("document_type")))
+            results.append(SearchResult(citation_id=f"{metadata['record_id']}#chunk-{int(metadata['chunk_index'])}", record_id=metadata["record_id"], filename=metadata["filename"], chunk_index=int(metadata["chunk_index"]), content=item["page_content"], score=1.0, document_date=metadata.get("document_date"), document_type=metadata.get("document_type"), source_page=metadata.get("source_page")))
         latest = next((item for item in reversed(items) if item["metadata"].get("document_date")), None)
         metadata = EvidenceMetadata(
             records_available=len(record_ids),
@@ -85,31 +86,22 @@ class LocalRecordIndex:
         )
         return results, metadata
 
-    def _chunk(self, record_id: str, filename: str, text: str, owner_id: str, document_date: str | None, document_type: str | None) -> list[Document]:
-        cleaned = re.sub(r"\s+", " ", text).strip()
-        if not cleaned:
-            return []
+    def _chunk(self, record_id: str, filename: str, text: str, owner_id: str, document_date: str | None, document_type: str | None, page_texts: list[str] | None = None) -> list[Document]:
+        sources = [(page, content) for page, content in enumerate(page_texts or [text], start=1) if content.strip()]
         chunks: list[str] = []
-        current: list[str] = []
-        current_length = 0
-        for word in cleaned.split(" "):
-            proposed_length = current_length + len(word) + (1 if current else 0)
-            if current and proposed_length > self.chunk_size:
-                chunks.append(" ".join(current))
-                current = []
-                current_length = 0
-            current.append(word)
-            current_length += len(word) + (1 if current_length else 0)
-        if current:
-            chunks.append(" ".join(current))
-        return [
-            Document(
-                id=f"{record_id}#chunk-{index}",
-                page_content=chunk,
-                metadata={"record_id": record_id, "filename": filename, "chunk_index": index, "owner_id": owner_id, "document_date": document_date, "document_type": document_type},
-            )
-            for index, chunk in enumerate(chunks)
-        ]
+        page_numbers: list[int] = []
+        for page, content in sources:
+            words = re.sub(r"\s+", " ", content).strip().split(" ")
+            current: list[str] = []
+            current_length = 0
+            for word in words:
+                proposed_length = current_length + len(word) + (1 if current else 0)
+                if current and proposed_length > self.chunk_size:
+                    chunks.append(" ".join(current)); page_numbers.append(page); current = []; current_length = 0
+                current.append(word); current_length += len(word) + (1 if current_length else 0)
+            if current:
+                chunks.append(" ".join(current)); page_numbers.append(page)
+        return [Document(id=f"{record_id}#chunk-{index}", page_content=chunk, metadata={"record_id": record_id, "filename": filename, "chunk_index": index, "owner_id": owner_id, "document_date": document_date, "document_type": document_type, "source_page": page_numbers[index]}) for index, chunk in enumerate(chunks)]
 
     @staticmethod
     def _tokens(value: str) -> set[str]:
