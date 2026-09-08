@@ -44,6 +44,7 @@ def test_ask_returns_grounded_fallback(monkeypatch, tmp_path):
     assert response.json()["mode"] == "extractive"
     assert response.json()["citations"][0]["citation_id"].endswith("#chunk-0")
     assert response.json()["conversation_id"]
+    assert response.json()["citation_validation"]["status"] == "passed"
 
 
 def test_urgent_question_is_stopped_before_retrieval(monkeypatch, tmp_path):

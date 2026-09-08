@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 
 from backend.app.models.retrieval import EvidenceMetadata, SearchResult
+from backend.app.models.validation import CitationValidation
 
 
 class AskRequest(BaseModel):
@@ -20,3 +21,4 @@ class AskResponse(BaseModel):
     safety_flags: list[str] = Field(default_factory=list)
     evidence: EvidenceMetadata = Field(default_factory=EvidenceMetadata)
     query_intent: str = "general"
+    citation_validation: CitationValidation = Field(default_factory=CitationValidation)

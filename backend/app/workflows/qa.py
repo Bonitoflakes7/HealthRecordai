@@ -7,6 +7,7 @@ from backend.app.services.answering import GroundedAnswerer
 from backend.app.services.retrieval import LocalRecordIndex
 from backend.app.services.safety import SafetyChecker
 from backend.app.services.query_router import route_question
+from backend.app.services.citation_validator import validate_answer
 
 
 LONGITUDINAL_TERMS = {
@@ -36,6 +37,7 @@ class QAState(TypedDict, total=False):
     evidence: EvidenceMetadata
     query_intent: str
     query_focus: str
+    citation_validation: dict
 
 
 def build_qa_graph(index: LocalRecordIndex, answerer: GroundedAnswerer, safety_checker: SafetyChecker | None = None):
@@ -66,7 +68,8 @@ def build_qa_graph(index: LocalRecordIndex, answerer: GroundedAnswerer, safety_c
 
     def answer(state: QAState) -> QAState:
         text, mode = answerer.answer(state["question"], state.get("results", []), state.get("history", []), evidence=state.get("evidence"), query_intent=state.get("query_intent"), query_focus=state.get("query_focus"))
-        return {"answer": text, "mode": mode}
+        validation = validate_answer(text, state.get("results", []))
+        return {"answer": text, "mode": mode, "citation_validation": validation.model_dump(mode="json")}
 
     builder = StateGraph(QAState)
     builder.add_node("safety", safety)
