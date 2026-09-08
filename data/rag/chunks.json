@@ -1,5 +1,101 @@
 [
   {
+    "page_content": "SAMPLE MEDICAL RECORD 06 For Software Testing Only \u2022 Fictional Patient Patient: Rohan Kapoor Patient ID: TEST-2026-00892 Date: 19 January 2025 Visit Type: Chronic condition follow-up Reason for Visit Follow-up for persistent elevated cholesterol. Patient reports difficulty maintaining dietary changes during the previous month. Vital Signs BP: 140/88 mmHg Pulse: 79 bpm Weight: 83.6 kg Assessment Persistent hyperlipidemia with elevated cardiovascular risk factors. Medication Started Atorvastatin 10 mg once daily, as prescribed by the treating physician. Additional Advice Continue dietary modification and regular exercise. Monitoring Lipid panel and liver function testing recommended after initiation of therapy. Follow-Up Six to eight weeks. Doctor: Dr . Meera Nair Synthetic record. Not a real medical document. \u2022 \u2022 \u2022 1",
+    "metadata": {
+      "record_id": "0672027992604090a3ca02b2a8d8330d",
+      "filename": "Synthetic Patient Record 06.pdf",
+      "chunk_index": 0,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2025-01-19",
+      "document_type": "clinical_note",
+      "source_page": 1
+    }
+  },
+  {
+    "page_content": "SAMPLE MEDICAL RECORD 05 For Software Testing Only \u2022 Fictional Patient Patient: Rohan Kapoor Patient ID: TEST-2026-00892 Date: 12 December 2024 Visit Type: Preventive health examination Vital Signs BP: 138/86 mmHg Pulse: 76 bpm Weight: 82.0 kg BMI: 27.4 kg/m\u00b2 Investigations Test Result HbA1c 6.0% Fasting Glucose 110 mg/dL Total Cholesterol 221 mg/dL LDL 142 mg/dL HDL 45 mg/dL Triglycerides 168 mg/dL ALT 31 U/L Creatinine 0.9 mg/dL Assessment Prediabetes Elevated LDL cholesterol Overweight Plan Lifestyle intervention reinforced. Discussed reducing processed foods and increasing physical activity. Because LDL remained elevated despite lifestyle changes, clinician discussed possible pharmacological treatment and recommended a follow-up consultation. \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 1 Doctor: Dr . Meera Nair Synthetic record. Not a real medical document. 2",
+    "metadata": {
+      "record_id": "0a724147177b49889418a27b1dac27ce",
+      "filename": "Synthetic Patient Record 05.pdf",
+      "chunk_index": 0,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2024-12-12",
+      "document_type": "clinical_note",
+      "source_page": 1
+    }
+  },
+  {
+    "page_content": "SAMPLE MEDICAL RECORD 04 For Software Testing Only \u2022 Fictional Patient Patient: Rohan Kapoor Patient ID: TEST-2026-00892 Date: 27 September 2024 Visit Type: Urgent consultation Chief Complaint Five-day history of cough, sore throat, nasal congestion, and low-grade fever . Vital Signs BP: 130/80 mmHg Pulse: 88 bpm Temperature: 99.6\u00b0F SpO\u2082: 97% Examination Mild throat congestion. Chest clear to auscultation. No respiratory distress. Assessment Acute upper respiratory tract infection. Treatment Paracetamol 500 mg as needed for fever/discomfort Cetirizine 10 mg once daily for symptomatic relief Increased oral fluids Rest advised Antibiotics were not prescribed. Follow-Up Return if fever persists, breathing difficulty develops, or symptoms significantly worsen. Doctor: Dr . Vikram Shah Synthetic record. Not a real medical document. \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 1",
+    "metadata": {
+      "record_id": "d4a59f88fc9542449a22a72a5bfcaac8",
+      "filename": "Synthetic Patient Record 04.pdf",
+      "chunk_index": 0,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2024-09-27",
+      "document_type": "clinical_note",
+      "source_page": 1
+    }
+  },
+  {
+    "page_content": "SAMPLE MEDICAL RECORD 03 For Software Testing Only \u2022 Fictional Patient Patient: Rohan Kapoor Patient ID: TEST-2026-00892 Date: 18 June 2024 Visit Type: Follow-up Reason for Visit Follow-up of elevated glucose and cholesterol. Patient reports improved diet and walking approximately 30 minutes on most days. Vital Signs BP: 128/82 mmHg Pulse: 74 bpm Weight: 80.8 kg Laboratory Results Test Previous Current Fasting Glucose 118 mg/dL 105 mg/dL HbA1c 6.1% 5.8% LDL 137 mg/dL 128 mg/dL Assessment Impaired fasting glucose, improving with lifestyle measures. Hyperlipidemia. Plan Continue diet and exercise program. Repeat lipid profile after six months. No new medication prescribed. Doctor: Dr . Ananya Rao Synthetic record. Not a real medical document. \u2022 \u2022 \u2022 1",
+    "metadata": {
+      "record_id": "185d196ad1f14e50acc9faf0faebbc4c",
+      "filename": "Synthetic Patient Record 03.pdf",
+      "chunk_index": 0,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2024-06-18",
+      "document_type": "clinical_note",
+      "source_page": 1
+    }
+  },
+  {
+    "page_content": "SAMPLE MEDICAL RECORD 02 For Software Testing Only \u2022 Fictional Patient Patient: Rohan Kapoor Patient ID: TEST-2026-00892 Date: 03 March 2024 Visit Type: Routine consultation Chief Complaint Patient reported increased thirst and frequent urination over the previous month. Vital Signs BP: 136/86 mmHg Pulse: 81 bpm Weight: 83.1 kg Investigations Ordered Fasting Blood Glucose HbA1c Complete Blood Count Lipid Profile Serum Creatinine Results Investigation Result Fasting Glucose 118 mg/dL HbA1c 6.1% Total Cholesterol 214 mg/dL LDL 137 mg/dL HDL 43 mg/dL Creatinine 0.9 mg/dL Assessment Impaired fasting glucose. Borderline elevated cholesterol. \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 1 Plan Dietary modification, increased physical activity, and weight management discussed. Medication not started at this visit. Follow-Up Repeat glucose and HbA1c in approximately three months. Doctor: Dr . Ananya Rao Synthetic record.",
+    "metadata": {
+      "record_id": "e37bad24d55944958f16a8500472c849",
+      "filename": "Synthetic Patient Record 02.pdf",
+      "chunk_index": 0,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2024-03-03",
+      "document_type": "clinical_note",
+      "source_page": 1
+    }
+  },
+  {
+    "page_content": "Not a real medical document. 2",
+    "metadata": {
+      "record_id": "e37bad24d55944958f16a8500472c849",
+      "filename": "Synthetic Patient Record 02.pdf",
+      "chunk_index": 1,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2024-03-03",
+      "document_type": "clinical_note",
+      "source_page": 1
+    }
+  },
+  {
+    "page_content": "SAMPLE MEDICAL RECORD 01 For Software Testing Only \u2022 Fictional Patient Patient: Rohan Kapoor Patient ID: TEST-2026-00892 Date: 14 January 2024 Visit Type: General consultation Chief Complaint Patient presented with intermittent lower back pain for approximately three weeks. History Pain began after increased physical activity. Described as a dull ache, worse after prolonged sitting. No radiation to the legs. No reported weakness or numbness. Vital Signs BP: 132/84 mmHg Pulse: 78 bpm Temperature: 98.5\u00b0F Weight: 82.4 kg Examination Mild tenderness over the lumbar paraspinal muscles. Range of motion mildly restricted due to discomfort. No neurological deficit observed. Assessment Mechanical lower back pain. Treatment Paracetamol 500 mg as needed for pain Local heat application Gentle stretching exercises Avoid prolonged sitting Follow-Up Return if symptoms persist beyond 2\u20133 weeks or",
+    "metadata": {
+      "record_id": "7d78a6efa9f346859336a79b1f4b263d",
+      "filename": "Synthetic Patient Record 01.pdf",
+      "chunk_index": 0,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2024-01-14",
+      "document_type": "clinical_note",
+      "source_page": 1
+    }
+  },
+  {
+    "page_content": "worsen. \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 \u2022 1 Doctor: Dr . Ananya Rao, General Medicine Clinic: Greenfield Medical Centre Synthetic record. Not a real medical document. 2",
+    "metadata": {
+      "record_id": "7d78a6efa9f346859336a79b1f4b263d",
+      "filename": "Synthetic Patient Record 01.pdf",
+      "chunk_index": 1,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2024-01-14",
+      "document_type": "clinical_note",
+      "source_page": 1
+    }
+  },
+  {
     "page_content": "SAMPLE MEDICAL RECORD 07 For Software Testing Only \u2022 Fictional Patient Patient: Rohan Kapoor Patient ID: TEST-2026-00892 Date: 11 March 2025 Visit Type: Laboratory follow-up Current Medication Atorvastatin 10 mg once daily. Patient reports taking medication regularly. No significant adverse symptoms reported. Laboratory Results Test Result Total Cholesterol 174 mg/dL LDL 96 mg/dL HDL 46 mg/dL Triglycerides 142 mg/dL ALT 29 U/L AST 25 U/L Assessment Improved lipid profile following treatment. Plan Continue current medication and lifestyle measures. Repeat lipid profile in approximately six months. Doctor: Dr . Meera Nair Synthetic record. Not a real medical document. 1",
     "metadata": {
       "record_id": "59a4f23964594907826598a5fa14f20c",
@@ -12355,6 +12451,30 @@
       "chunk_index": 2,
       "owner_id": "dev-user",
       "document_date": null,
+      "document_type": "prescription",
+      "source_page": 1
+    }
+  },
+  {
+    "page_content": "PRESCRIPTION TEMPLATE Prescription No. Prescription Date 0001 November 8, 2021 ee Patient Information Name Age Anne Burton 30 Phone Number Date of Birth (123) 123-4567 Wednesday, November 8, 1989 Email Gender anne.burton@noemailtest.com Female Address 1372 Payne Street Richlands, VA, 24641 Allergies Notable Health Condition Seafood None | List of Prescribed Medications Medication Name Purpose Dosage Route Frequency Removes Expectorant phlegm 1 tablet Oral Every 4 hours Paracetamol For fever 1 tablet Oral Every 4 hours Bacterial infection 500mg Oral Every 8 hours Vitamin C Immune system 500mg Oral Once a day Vitamin D Immune System 1 tablet Oral Once a day Physician Name Physician Phone Number Leslie Holden (112) 312-3456 Physician Signature Physician Email Aa leslie.h@noemail.com November 9, 2021",
+    "metadata": {
+      "record_id": "8e76204f99df4c4b9375fd8cb93bbfde",
+      "filename": "prescription-template_x.png",
+      "chunk_index": 0,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2021-11-08",
+      "document_type": "prescription",
+      "source_page": 1
+    }
+  },
+  {
+    "page_content": "cp Quest Care Medical Clinic Anand Society, Dindayal Road, Ghatkopar questca re Mumbai, 368585 . Ph: 08097700800 MEDICAL CLINIC Patient: Aakruti Kapoor Mr. Anil Kumar Sharma Female, 31 years M.D.S. (Pune) 8097700800 Registration No.: A-77363 Date: 01-05-2019 Complaint: Full Body Pain, Weakness Feeling Observations: High Body Temperature, Reddish eye Investigations Suggested: \u00c2\u00a2 Cratine * CBC Count Diagnosis: Dengue Rx Medicine Dosage Duration Measure Instructions Tab Rantac 150mg 1-1-1 3 days After Meal CAP SM FIBRO 1-0-1 5 days qual de Remarks: Keep measuring body Temp. twice a day. Next follow-up date: Friday May 03, 2019 5:00 PM Authorised Signature This is a computer generated document",
+    "metadata": {
+      "record_id": "46a868994175403ca5d46d16c7ba198f",
+      "filename": "web_prescription_big.png",
+      "chunk_index": 0,
+      "owner_id": "860b566e6fb642afaeaaad726f35b8d5",
+      "document_date": "2019-05-03",
       "document_type": "prescription",
       "source_page": 1
     }

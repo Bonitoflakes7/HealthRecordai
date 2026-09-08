@@ -30,6 +30,7 @@ class GroundedAnswerer:
                 "and prescribed medications from current active medications when the evidence allows. "
                 "Do not turn temporal sequence into causation: say that one finding occurred after treatment unless the source explicitly documents causation. "
                 "Use complete natural sentences for timeline entries; write 'No medication was started at this visit' instead of a fragment such as 'Medication not started'. "
+                "For first-documented or earliest-evidence questions, identify the earliest dated record explicitly supporting the finding, quote or closely preserve its terminology, and then show later terminology in chronological order. Do not call an earlier finding a diagnosis unless that earlier record does so. "
                 "Write concise headings and bullets. Cite each bullet or short paragraph once; do not repeat the same citation after every sentence.\n\n"
                 f"Evidence metadata: {evidence_json}\n\n"
                 f"Query intent: {query_intent or 'general'}\n{query_focus or ''}\n\n"

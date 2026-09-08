@@ -17,6 +17,8 @@ _LONGITUDINAL = (
 
 def route_question(question: str) -> QueryRoute:
     lowered = question.casefold()
+    if any(term in lowered for term in ("first documented", "first evidence", "earliest evidence", "when was it first", "first diagnosed", "initially documented")):
+        return QueryRoute("first_documented", True, "Find the earliest dated record that explicitly supports the requested condition or finding. Preserve the exact early wording, then list later terminology chronologically. Do not apply a later diagnosis retroactively to an earlier record.")
     longitudinal = any(term in lowered for term in _LONGITUDINAL)
     if longitudinal:
         return QueryRoute("longitudinal", True, "Use every relevant dated record, earliest to latest, and identify the latest documented state.")

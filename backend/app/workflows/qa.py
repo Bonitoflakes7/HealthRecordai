@@ -62,7 +62,10 @@ def build_qa_graph(index: LocalRecordIndex, answerer: GroundedAnswerer, safety_c
     def retrieve(state: QAState) -> QAState:
         owner_id = state.get("owner_id")
         retrieval_mode = getattr(index, "retrieval_mode", "lexical")
-        if state.get("record_id") is None and (state.get("query_intent") == "longitudinal" or is_longitudinal_question(state["question"])):
+        if state.get("record_id") is None and (
+            state.get("query_intent") in {"longitudinal", "first_documented"}
+            or is_longitudinal_question(state["question"])
+        ):
             results, evidence = index.search_all(owner_id=owner_id, limit=60)
             return {"results": results, "evidence": evidence, "retrieval_mode": retrieval_mode}
         results = index.search(state["question"], record_id=state.get("record_id"), limit=state.get("limit", 5), owner_id=owner_id)
