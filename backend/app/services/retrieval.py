@@ -1,5 +1,8 @@
 import json
+import os
 import re
+import tempfile
+import time
 from pathlib import Path
 
 from langchain_core.documents import Document
@@ -37,8 +40,32 @@ class LocalRecordIndex:
         documents = self._chunk(record_id, filename, text, owner_id, document_date, document_type, page_texts)
         existing = [item for item in self._read() if item["metadata"].get("record_id") != record_id]
         existing.extend(self._serialize(document) for document in documents)
-        self.index_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
+        self._write_index(existing)
         return len(documents)
+
+    def _write_index(self, items: list[dict]) -> None:
+        """Replace the index atomically so reloads never write directly to the live file."""
+        payload = json.dumps(items, indent=2)
+        temporary_path: str | None = None
+        try:
+            with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=self.index_path.parent, prefix="chunks-", suffix=".tmp", delete=False) as temporary:
+                temporary.write(payload)
+                temporary_path = temporary.name
+            last_error: PermissionError | None = None
+            for attempt in range(5):
+                try:
+                    os.replace(temporary_path, self.index_path)
+                    last_error = None
+                    break
+                except PermissionError as exc:
+                    last_error = exc
+                    time.sleep(0.1 * (attempt + 1))
+            if last_error is not None:
+                raise last_error
+            temporary_path = None
+        finally:
+            if temporary_path:
+                Path(temporary_path).unlink(missing_ok=True)
 
     def search(self, query: str, record_id: str | None = None, limit: int = 5, owner_id: str | None = None) -> list[SearchResult]:
         terms = self._tokens(query)
