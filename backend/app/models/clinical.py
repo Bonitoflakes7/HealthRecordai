@@ -57,14 +57,31 @@ class Procedure(BaseModel):
     source_text: str
 
 
+class DateCandidate(BaseModel):
+    value: date
+    label: str | None = None
+    source_text: str
+    confidence: str = "explicit"
+
+
+class ClinicalEvent(BaseModel):
+    event_date: date | None = None
+    event_type: str
+    title: str
+    details: str | None = None
+    source_text: str
+
+
 class NormalizedDocument(BaseModel):
     record_id: str
     document_type: DocumentType = "unknown"
     title: str | None = None
     document_date: date | None = None
+    date_candidates: list[DateCandidate] = Field(default_factory=list)
     sections: list[DocumentSection] = Field(default_factory=list)
     observations: list[Observation] = Field(default_factory=list)
     conditions: list[Condition] = Field(default_factory=list)
     medications: list[Medication] = Field(default_factory=list)
     investigations: list[Investigation] = Field(default_factory=list)
     procedures: list[Procedure] = Field(default_factory=list)
+    clinical_events: list[ClinicalEvent] = Field(default_factory=list)

@@ -32,6 +32,7 @@ This phase provides a small FastAPI service that can:
 - isolate records, local RAG results, timelines, analytics, and conversations by owner;
 - write privacy-preserving audit events without storing question text, answers, or extracted PHI in audit metadata;
 - expose only the current user's audit history through `/api/v1/audit`;
+- preserve multiple explicit dates and emit structured clinical events for visits, conditions, medications, investigations, and procedures;
 - keep authentication disabled by default for local development, and enable it explicitly for multi-user use.
 
 ## Run

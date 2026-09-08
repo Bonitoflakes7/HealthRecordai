@@ -51,3 +51,18 @@ def test_normalizer_extracts_rich_clinical_items_conservatively():
     assert document.medications[0].status == "active"
     assert document.investigations[0].status == "recommended"
     assert document.procedures == []
+
+
+def test_normalizer_preserves_multiple_dates_and_builds_clinical_events():
+    document = DocumentNormalizer().normalize(
+        "record-5",
+        "CHRONIC CARE NOTE\nDate of Visit: 2024-01-14\n"
+        "Assessment\nMechanical lower back pain.\n"
+        "Medication\nParacetamol 500 mg twice daily.\n"
+        "Follow-up\nReviewed on March 3, 2024; return visit planned for 2024/06/18.",
+    )
+
+    assert str(document.document_date) == "2024-01-14"
+    assert [str(item.value) for item in document.date_candidates] == ["2024-01-14", "2024-03-03", "2024-06-18"]
+    assert any(item.event_type == "condition" and item.event_date.isoformat() == "2024-01-14" for item in document.clinical_events)
+    assert any(item.event_type == "medication" and item.event_date.isoformat() == "2024-01-14" for item in document.clinical_events)

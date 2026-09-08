@@ -23,11 +23,13 @@ class TimelineService:
                     filename=summary.filename,
                     document_type=document.document_type,
                     title=document.title,
+                    date_candidates=document.date_candidates,
                     observations=document.observations,
                     conditions=document.conditions,
                     medications=document.medications,
                     investigations=document.investigations,
                     procedures=document.procedures,
+                    clinical_events=document.clinical_events,
                 )
             )
         events.sort(key=lambda event: event.event_date or date.min, reverse=True)

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from backend.app.models.clinical import NormalizedDocument, Observation
+from backend.app.models.clinical import ClinicalEvent, NormalizedDocument, Observation
 from backend.app.models.schemas import RecordSummary
 from backend.app.services.timeline import TimelineService
 
@@ -18,6 +18,7 @@ class FakeRecords:
                 document_type="lab_report",
                 document_date="2026-01-14",
                 observations=[Observation(name="glucose", value="100", unit="mg/dL", source_text="glucose 100 mg/dL")],
+                clinical_events=[ClinicalEvent(event_type="investigation", title="Lab results", details="glucose 100 mg/dL", source_text="glucose 100 mg/dL")],
             )
         )
 
@@ -27,3 +28,4 @@ def test_timeline_is_built_from_normalized_documents():
 
     assert response.events[0].event_date.isoformat() == "2026-01-14"
     assert response.events[0].observations[0].name == "glucose"
+    assert response.events[0].clinical_events[0].event_type == "investigation"

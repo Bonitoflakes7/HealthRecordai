@@ -1,14 +1,14 @@
 import re
 from datetime import date, datetime
 
-from backend.app.models.clinical import Condition, DocumentSection, DocumentType, Investigation, Medication, NormalizedDocument, Observation, Procedure
+from backend.app.models.clinical import ClinicalEvent, Condition, DateCandidate, DocumentSection, DocumentType, Investigation, Medication, NormalizedDocument, Observation, Procedure
 
 
 class DocumentNormalizer:
     """Create conservative structure from extracted text without clinical inference."""
 
     _date_pattern = re.compile(r"\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b")
-    _written_date_pattern = re.compile(r"\b(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(20\d{2})\b", re.I)
+    _written_date_pattern = re.compile(r"\b(?:([0-9]{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(20\d{2})|((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+[0-9]{1,2},\s*20\d{2}))\b", re.I)
     _observation_patterns = (
         ("blood_pressure", re.compile(r"\b(?:blood pressure|bp)\s*[:=]?\s*(\d{2,3})\s*/\s*(\d{2,3})\s*(mmhg)?\b", re.I), None),
         ("heart_rate", re.compile(r"\b(?:heart rate|pulse(?: rate)?)\s*[:=]?\s*(\d{2,3})\s*(bpm)?\b", re.I), "bpm"),
@@ -19,17 +19,20 @@ class DocumentNormalizer:
 
     def normalize(self, record_id: str, text: str) -> NormalizedDocument:
         cleaned = text.strip()
+        date_candidates = self._date_candidates(cleaned)
         return NormalizedDocument(
             record_id=record_id,
             document_type=self._classify(cleaned),
             title=self._title(cleaned),
-            document_date=self._first_date(cleaned),
+            document_date=self._document_date(cleaned, date_candidates),
+            date_candidates=date_candidates,
             sections=self._sections(cleaned),
             observations=self._observations(cleaned),
             conditions=self._conditions(cleaned),
             medications=self._medications(cleaned),
             investigations=self._investigations(cleaned),
             procedures=self._procedures(cleaned),
+            clinical_events=self._clinical_events(cleaned, date_candidates),
         )
 
     @staticmethod
@@ -53,18 +56,46 @@ class DocumentNormalizer:
 
     @classmethod
     def _first_date(cls, text: str) -> date | None:
-        match = cls._date_pattern.search(text)
-        if match:
+        candidates = cls._date_candidates(text)
+        return candidates[0].value if candidates else None
+
+    @classmethod
+    def _document_date(cls, text: str, candidates: list[DateCandidate]) -> date | None:
+        if not candidates:
+            return None
+        labeled = re.search(r"(?im)^\s*(?:date(?: of (?:visit|service|report))?|visit date|encounter date)\s*[:\-]\s*(.+)$", text)
+        if labeled:
+            line = labeled.group(1)
+            for candidate in candidates:
+                if candidate.source_text in line:
+                    return candidate.value
+        return candidates[0].value
+
+    @classmethod
+    def _date_candidates(cls, text: str) -> list[DateCandidate]:
+        candidates: list[DateCandidate] = []
+        for raw_line in text.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            matches = list(cls._date_pattern.finditer(line)) + list(cls._written_date_pattern.finditer(line))
+            for match in sorted(matches, key=lambda item: item.start()):
+                token = match.group(0)
+                parsed = cls._parse_date_token(token)
+                if not parsed:
+                    continue
+                prefix = line[:match.start()].strip(" -*:;,.\t")
+                label = prefix[-60:] if prefix else None
+                candidates.append(DateCandidate(value=parsed, label=label or None, source_text=token))
+        return cls._unique(candidates, lambda item: (item.value, item.source_text, item.label))
+
+    @staticmethod
+    def _parse_date_token(token: str) -> date | None:
+        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%d %B %Y", "%B %d, %Y"):
             try:
-                return date(*(int(part) for part in match.groups()))
+                return datetime.strptime(token, fmt).date()
             except ValueError:
-                return None
-        written = cls._written_date_pattern.search(text)
-        if written:
-            try:
-                return datetime.strptime(written.group(0), "%d %B %Y").date()
-            except ValueError:
-                return None
+                continue
         return None
 
     @staticmethod
@@ -176,6 +207,31 @@ class DocumentNormalizer:
                 status = "planned" if re.search(r"planned|scheduled|recommended", line, re.I) else "performed" if re.search(r"performed|underwent|completed", line, re.I) else "documented"
                 items.append(Procedure(name=line.rstrip(".;"), status=status, source_text=line))
         return cls._unique(items, lambda item: item.name.casefold())
+
+    @classmethod
+    def _clinical_events(cls, text: str, dates: list[DateCandidate]) -> list[ClinicalEvent]:
+        document_date = dates[0].value if dates else None
+        events: list[ClinicalEvent] = []
+        for section in cls._sections(text):
+            heading = section.heading.rstrip(": ")
+            lowered = heading.casefold()
+            event_type = None
+            if re.search(r"visit|encounter|consult|follow[- ]?up", lowered):
+                event_type = "visit"
+            elif re.search(r"medication|prescription|treatment", lowered):
+                event_type = "medication"
+            elif re.search(r"investig|monitor|lab|test|imaging", lowered):
+                event_type = "investigation"
+            elif re.search(r"procedure|surgery|operation|intervention", lowered):
+                event_type = "procedure"
+            elif re.search(r"assessment|diagnos|problem|impression", lowered):
+                event_type = "condition"
+            if not event_type:
+                continue
+            for line in cls._clean_lines(section.text):
+                event_date = next((item.value for item in dates if item.source_text in line), document_date)
+                events.append(ClinicalEvent(event_date=event_date, event_type=event_type, title=heading, details=line, source_text=line))
+        return cls._unique(events, lambda item: (item.event_date, item.event_type, item.details))
 
     @staticmethod
     def _clean_lines(text: str) -> list[str]:
