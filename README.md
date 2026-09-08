@@ -34,6 +34,7 @@ This phase provides a small FastAPI service that can:
 - expose only the current user's audit history through `/api/v1/audit`;
 - preserve multiple explicit dates and emit structured clinical events for visits, conditions, medications, investigations, and procedures;
 - validate answer citations against retrieved evidence and report uncited or weakly supported claims through `citation_validation`;
+- classify safety intent as `normal`, `high_risk`, or `urgent`, with urgent requests stopped before retrieval;
 - keep authentication disabled by default for local development, and enable it explicitly for multi-user use.
 
 ## Run

@@ -68,6 +68,8 @@ def build_qa_graph(index: LocalRecordIndex, answerer: GroundedAnswerer, safety_c
 
     def answer(state: QAState) -> QAState:
         text, mode = answerer.answer(state["question"], state.get("results", []), state.get("history", []), evidence=state.get("evidence"), query_intent=state.get("query_intent"), query_focus=state.get("query_focus"))
+        if state.get("safety_level") == "high_risk" and state.get("safety_message"):
+            text = f"Safety note: {state['safety_message']}\n\n{text}"
         validation = validate_answer(text, state.get("results", []))
         return {"answer": text, "mode": mode, "citation_validation": validation.model_dump(mode="json")}
 
