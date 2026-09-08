@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     data_dir: Path = PROJECT_ROOT / "data"
     max_upload_mb: int = 25
-    cors_origins: str = "http://localhost:3000,http://localhost:5173"
+    cors_origins: str = "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173"
     pdftoppm_cmd: str = "pdftoppm"
     tesseract_cmd: str = "tesseract"
     llm_model: str | None = None

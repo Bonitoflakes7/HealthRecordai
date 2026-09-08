@@ -64,6 +64,17 @@ def test_search_returns_citation_for_extracted_text(monkeypatch, tmp_path):
     assert response.json()["retrieval_mode"] == "lexical"
 
 
+def test_source_record_endpoint_returns_original_upload(monkeypatch, tmp_path):
+    monkeypatch.setattr(config.settings, "data_dir", tmp_path)
+    with TestClient(app) as client:
+        uploaded = client.post("/api/v1/records", files={"file": ("notes.txt", BytesIO(b"source text"), "text/plain")}).json()
+        response = client.get(f"/api/v1/records/{uploaded['id']}/source")
+
+    assert response.status_code == 200
+    assert response.content == b"source text"
+    assert "inline" in response.headers.get("content-disposition", "")
+
+
 def test_ask_returns_grounded_fallback(monkeypatch, tmp_path):
     monkeypatch.setattr(config.settings, "data_dir", tmp_path)
     with TestClient(app) as client:

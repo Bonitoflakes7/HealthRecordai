@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, Response, UploadFile, status
+from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from backend.app.models.retrieval import SearchResponse
@@ -183,6 +184,21 @@ def get_record(record_id: str, request: Request, user: User = Depends(current_us
     if record is None:
         raise HTTPException(status_code=404, detail="record not found")
     return record
+
+
+@router.get("/api/v1/records/{record_id}/source")
+def source_record(record_id: str, request: Request, user: User = Depends(current_user)) -> FileResponse:
+    owner_id = user.id if request.app.state.settings.auth_enabled else None
+    record = get_store(request).get_record(record_id, owner_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="record not found")
+    source_path = get_store(request).raw_path(record_id)
+    return FileResponse(
+        source_path,
+        media_type=record.mime_type or "application/octet-stream",
+        filename=record.filename,
+        content_disposition_type="inline",
+    )
 
 
 @router.post("/api/v1/records", response_model=RecordDetail, status_code=status.HTTP_201_CREATED)

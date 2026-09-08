@@ -21,6 +21,8 @@ from backend.app.services.security import AuthStore, AuditStore
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if settings.auth_enabled and len(settings.auth_secret_key.encode("utf-8")) < 32:
+        raise RuntimeError("AUTH_SECRET_KEY must be at least 32 bytes when AUTH_ENABLED=true")
     app.state.settings = settings
     app.state.record_store = RecordStore()
     app.state.conversation_store = SqliteConversationStore(settings.conversation_db_path or settings.data_dir / "health_record.db")

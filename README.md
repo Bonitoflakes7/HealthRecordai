@@ -73,7 +73,7 @@ npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`. The frontend uses `http://127.0.0.1:8000` by default. To point it at another backend, set `localStorage.healthApiUrl` in the browser before loading the app.
+Open `http://localhost:5173` or `http://127.0.0.1:5173`. The frontend derives the API host from the browser host by default, keeping authentication cookies same-site. To point it at another backend, set `localStorage.healthApiUrl` in the browser before loading the app.
 
 If Tesseract is not on `PATH`, copy `.env.example` to `.env` and set `TESSERACT_CMD` to the full executable path. `PDFTOPPM_CMD` can be configured the same way.
 

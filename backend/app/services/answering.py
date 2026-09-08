@@ -28,6 +28,8 @@ class GroundedAnswerer:
                 "sort events from earliest to latest, and identify the latest documented record before describing current status. "
                 "Separate confirmed information from what cannot be determined. Distinguish investigations from procedures, "
                 "and prescribed medications from current active medications when the evidence allows. "
+                "Do not turn temporal sequence into causation: say that one finding occurred after treatment unless the source explicitly documents causation. "
+                "Use complete natural sentences for timeline entries; write 'No medication was started at this visit' instead of a fragment such as 'Medication not started'. "
                 "Write concise headings and bullets. Cite each bullet or short paragraph once; do not repeat the same citation after every sentence.\n\n"
                 f"Evidence metadata: {evidence_json}\n\n"
                 f"Query intent: {query_intent or 'general'}\n{query_focus or ''}\n\n"
