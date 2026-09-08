@@ -1,0 +1,48 @@
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from backend.app.api.routes import router
+from backend.app.core.config import settings
+from backend.app.services.records import RecordStore
+from backend.app.services.extraction import DocumentExtractor
+from backend.app.services.normalization import DocumentNormalizer
+from backend.app.workflows.ingestion import build_ingestion_graph
+from backend.app.services.retrieval import LocalRecordIndex
+from backend.app.services.answering import configured_answerer
+from backend.app.workflows.qa import build_qa_graph
+from backend.app.services.sqlite_conversations import SqliteConversationStore
+from backend.app.services.timeline import TimelineService
+from backend.app.services.analytics import ClinicalAnalyticsService
+from backend.app.services.pubmed import PubMedClient
+from backend.app.services.security import AuthStore, AuditStore
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.settings = settings
+    app.state.record_store = RecordStore()
+    app.state.conversation_store = SqliteConversationStore(settings.conversation_db_path or settings.data_dir / "health_record.db")
+    database_path = settings.conversation_db_path or settings.data_dir / "health_record.db"
+    app.state.auth_store = AuthStore(database_path)
+    app.state.audit_store = AuditStore(database_path)
+    app.state.ingestion_graph = build_ingestion_graph(DocumentExtractor(), DocumentNormalizer())
+    app.state.rag_index = LocalRecordIndex()
+    app.state.qa_graph = build_qa_graph(app.state.rag_index, configured_answerer())
+    app.state.timeline_service = TimelineService(app.state.record_store)
+    app.state.analytics_service = ClinicalAnalyticsService(app.state.record_store)
+    app.state.pubmed_client = PubMedClient(settings.data_dir / "literature", settings.pubmed_email)
+    app.state.literature_answerer = configured_answerer()
+    yield
+
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origin_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.include_router(router)

@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic-settings
+pypdf
+langchain-core
+langgraph
+langchain
+langchain-google-genai
+pytest
+pyjwt
+pwdlib[argon2]

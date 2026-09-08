@@ -1,0 +1,28 @@
+from backend.app.services.retrieval import LocalRecordIndex
+
+
+def test_local_index_replaces_previous_record_chunks(tmp_path):
+    index = LocalRecordIndex(tmp_path / "chunks.json")
+    index.index_record("record-1", "notes.txt", "Blood pressure was 120/80.")
+    index.index_record("record-1", "notes.txt", "Heart rate was 72 bpm.")
+
+    results = index.search("blood pressure")
+    assert results == []
+    assert index.search("heart rate")[0].citation_id == "record-1#chunk-0"
+
+
+def test_search_can_filter_to_one_record(tmp_path):
+    index = LocalRecordIndex(tmp_path / "chunks.json")
+    index.index_record("record-1", "one.txt", "Glucose was 100 mg/dL.")
+    index.index_record("record-2", "two.txt", "Glucose was 140 mg/dL.")
+
+    results = index.search("glucose", record_id="record-2")
+    assert len(results) == 1
+    assert results[0].record_id == "record-2"
+
+
+def test_numeric_only_query_does_not_create_false_match(tmp_path):
+    index = LocalRecordIndex(tmp_path / "chunks.json")
+    index.index_record("record-1", "notes.txt", "The visit lasted 5 minutes.")
+
+    assert index.search("5") == []

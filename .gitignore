@@ -1,0 +1,58 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+data/records/
+data/uploads/
+.pytest_cache/
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables / secrets
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test/cache
+.pytest_cache/
+.mypy_cache/
+
+# Generated files
+outputs/
+
+# Logs
+*.log
+
+# Node
+node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# Frontend environment
+frontend/.env
+frontend/.env.local
+
+# Test/cache
+.pytest_cache/
+.pytest_tmp/
+
+# Temporary testing files
+Sample data 2.txt
+sample data.txt
+test1.txt
+test2.txt
