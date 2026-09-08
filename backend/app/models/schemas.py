@@ -23,6 +23,7 @@ class RecordSummary(BaseModel):
     created_at: datetime
     extracted_characters: int = 0
     owner_id: str | None = None
+    patient_id: str | None = None
 
 
 class RecordDetail(RecordSummary):

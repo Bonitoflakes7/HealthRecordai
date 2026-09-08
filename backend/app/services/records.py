@@ -50,7 +50,7 @@ class RecordStore:
         manifest = self._read_manifest(record_dir / "manifest.json")
         return record_dir / manifest.filename
 
-    async def save_upload(self, upload: UploadFile, owner_id: str = "dev-user") -> RecordSummary:
+    async def save_upload(self, upload: UploadFile, owner_id: str = "dev-user", patient_id: str | None = None) -> RecordSummary:
         record_id = uuid4().hex
         record_dir = self._record_dir(record_id)
         record_dir.mkdir(parents=True)
@@ -83,6 +83,7 @@ class RecordStore:
             status="uploaded",
             created_at=now,
             owner_id=owner_id,
+            patient_id=self._validate_patient_id(patient_id),
         )
         self._write_manifest(record_dir, manifest)
         return manifest
@@ -108,8 +109,13 @@ class RecordStore:
         record = self.get_record(record_id, owner_id)
         if record is None:
             raise ValueError("record not found")
+        patient_id = document.patient_id or record.patient_id
+        if patient_id != document.patient_id:
+            document = document.model_copy(update={"patient_id": patient_id})
         (self._record_dir(record_id) / "structured.json").write_text(document.model_dump_json(indent=2), encoding="utf-8")
-        return record.model_copy(update={"structured": document})
+        manifest = self._read_manifest(self._record_dir(record_id) / "manifest.json").model_copy(update={"patient_id": patient_id})
+        self._write_manifest(self._record_dir(record_id), manifest)
+        return record.model_copy(update={"structured": document, "patient_id": patient_id})
 
     def _record_dir(self, record_id: str) -> Path:
         if not re.fullmatch(r"[0-9a-f]{32}", record_id):
@@ -119,6 +125,15 @@ class RecordStore:
     @staticmethod
     def _safe_filename(filename: str) -> str:
         return Path(filename).name.replace("\x00", "_") or "unnamed-record"
+
+    @staticmethod
+    def _validate_patient_id(patient_id: str | None) -> str | None:
+        if patient_id is None or not patient_id.strip():
+            return None
+        value = patient_id.strip()
+        if len(value) > 128 or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", value):
+            raise UploadValidationError("patient_id must be 1-128 characters using letters, numbers, dots, underscores, slashes, or hyphens")
+        return value
 
     @staticmethod
     def _validate_upload(path: Path, filename: str, mime_type: str | None, size: int) -> SourceType:

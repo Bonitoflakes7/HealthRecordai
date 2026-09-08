@@ -9,6 +9,7 @@ class TimelineEvent(BaseModel):
     event_date: date | None = None
     record_id: str
     filename: str
+    patient_id: str | None = None
     document_type: str
     title: str | None = None
     date_candidates: list[DateCandidate] = Field(default_factory=list)

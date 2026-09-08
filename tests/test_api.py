@@ -26,6 +26,34 @@ def test_text_upload_is_extracted_and_retrievable(monkeypatch, tmp_path):
     assert fetched.json()["structured"]["observations"][0]["name"] == "blood_pressure"
 
 
+def test_patient_identity_is_separate_from_owner_identity(monkeypatch, tmp_path):
+    monkeypatch.setattr(config.settings, "data_dir", tmp_path)
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/v1/records",
+            files={"file": ("notes.txt", BytesIO(b"Patient ID: PAT-001\nBlood pressure 120/80"), "text/plain")},
+        )
+        record = response.json()
+
+    assert response.status_code == 201
+    assert record["owner_id"] == "dev-user"
+    assert record["patient_id"] == "PAT-001"
+    assert record["structured"]["patient_id"] == "PAT-001"
+
+
+def test_patient_id_form_value_is_validated(monkeypatch, tmp_path):
+    monkeypatch.setattr(config.settings, "data_dir", tmp_path)
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/v1/records",
+            data={"patient_id": "Patient Name"},
+            files={"file": ("notes.txt", BytesIO(b"hello"), "text/plain")},
+        )
+
+    assert response.status_code == 400
+    assert "patient_id" in response.json()["detail"]
+
+
 def test_search_returns_citation_for_extracted_text(monkeypatch, tmp_path):
     monkeypatch.setattr(config.settings, "data_dir", tmp_path)
     with TestClient(app) as client:

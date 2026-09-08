@@ -82,6 +82,7 @@ class ClinicalEvent(BaseModel):
 
 class NormalizedDocument(BaseModel):
     record_id: str
+    patient_id: str | None = None
     document_type: DocumentType = "unknown"
     title: str | None = None
     document_date: date | None = None

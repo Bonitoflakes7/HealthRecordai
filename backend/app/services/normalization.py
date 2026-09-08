@@ -22,6 +22,7 @@ class DocumentNormalizer:
         date_candidates = self._date_candidates(cleaned)
         document = NormalizedDocument(
             record_id=record_id,
+            patient_id=self._patient_id(cleaned),
             document_type=self._classify(cleaned),
             title=self._title(cleaned),
             document_date=self._document_date(cleaned, date_candidates),
@@ -35,6 +36,11 @@ class DocumentNormalizer:
             clinical_events=self._clinical_events(cleaned, date_candidates),
         )
         return self._attach_pages(document, page_texts)
+
+    @staticmethod
+    def _patient_id(text: str) -> str | None:
+        match = re.search(r"(?im)^\s*(?:patient\s*id|patient\s*number|mrn|medical\s*record\s*(?:number|id))\s*[:#-]\s*([A-Za-z0-9][A-Za-z0-9._/-]{1,127})\s*$", text)
+        return match.group(1) if match else None
 
     @staticmethod
     def _attach_pages(document: NormalizedDocument, page_texts: list[str] | None) -> NormalizedDocument:

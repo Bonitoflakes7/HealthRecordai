@@ -21,6 +21,7 @@ class TimelineService:
                     event_date=document.document_date,
                     record_id=summary.id,
                     filename=summary.filename,
+                    patient_id=summary.patient_id,
                     document_type=document.document_type,
                     title=document.title,
                     date_candidates=document.date_candidates,

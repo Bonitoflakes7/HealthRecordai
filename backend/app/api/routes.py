@@ -172,13 +172,14 @@ async def create_record(
     request: Request,
     file: UploadFile = File(...),
     description: str | None = Form(default=None),
+    patient_id: str | None = Form(default=None),
     user: User = Depends(current_user),
 ) -> RecordDetail:
     del description
     store = get_store(request)
     try:
         owner_id = user.id if request.app.state.settings.auth_enabled else "dev-user"
-        summary = await store.save_upload(file, owner_id)
+        summary = await store.save_upload(file, owner_id, patient_id)
     except UploadValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except ValueError as exc:
@@ -196,7 +197,10 @@ async def create_record(
     store.set_extracted(summary.id, result["text"])
     from backend.app.models.clinical import NormalizedDocument
 
-    response = store.set_structured(summary.id, NormalizedDocument.model_validate(result["structured"]), owner_id)
+    document = NormalizedDocument.model_validate(result["structured"])
+    if summary.patient_id:
+        document = document.model_copy(update={"patient_id": summary.patient_id})
+    response = store.set_structured(summary.id, document, owner_id)
     request.app.state.rag_index.index_record(
         summary.id,
         summary.filename,
