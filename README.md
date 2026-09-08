@@ -36,6 +36,7 @@ This phase provides a small FastAPI service that can:
 - validate answer citations against retrieved evidence and report uncited or weakly supported claims through `citation_validation`;
 - classify safety intent as `normal`, `high_risk`, or `urgent`, with urgent requests stopped before retrieval;
 - keep `owner_id` as the authorization boundary while tracking a separate optional `patient_id` on records;
+- use an `HttpOnly`, `SameSite=Lax` authentication cookie for the browser frontend while retaining bearer tokens for Swagger and API clients;
 - keep authentication disabled by default for local development, and enable it explicitly for multi-user use.
 
 ## Run

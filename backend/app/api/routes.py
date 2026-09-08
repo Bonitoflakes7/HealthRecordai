@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, Response, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from backend.app.models.retrieval import SearchResponse
@@ -25,6 +25,7 @@ def get_store(request: Request) -> RecordStore:
 def current_user(request: Request, token: str | None = Depends(oauth2_scheme)) -> User:
     if not request.app.state.settings.auth_enabled:
         return User(id="dev-user", username="development")
+    token = token or request.cookies.get(request.app.state.settings.auth_cookie_name)
     if not token:
         raise HTTPException(status_code=401, detail="authentication required", headers={"WWW-Authenticate": "Bearer"})
     user_id = decode_access_token(token)
@@ -51,12 +52,28 @@ def register(payload: UserRegistration, request: Request) -> User:
 
 
 @router.post("/api/v1/auth/token", response_model=Token)
-def token(request: Request, form: OAuth2PasswordRequestForm = Depends()) -> Token:
+def token(request: Request, response: Response, form: OAuth2PasswordRequestForm = Depends()) -> Token:
     user = request.app.state.auth_store.authenticate(form.username, form.password)
     if user is None:
         raise HTTPException(status_code=401, detail="incorrect username or password", headers={"WWW-Authenticate": "Bearer"})
     request.app.state.audit_store.record(user.id, "auth.login", "user", user.id)
-    return Token(access_token=create_access_token(user))
+    access_token = create_access_token(user)
+    response.set_cookie(
+        key=request.app.state.settings.auth_cookie_name,
+        value=access_token,
+        httponly=True,
+        secure=request.app.state.settings.auth_cookie_secure,
+        samesite="lax",
+        max_age=request.app.state.settings.access_token_expire_minutes * 60,
+        path="/",
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return Token(access_token=access_token)
+
+
+@router.post("/api/v1/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(request: Request, response: Response) -> None:
+    response.delete_cookie(request.app.state.settings.auth_cookie_name, path="/")
 
 
 @router.get("/api/v1/auth/me", response_model=User)

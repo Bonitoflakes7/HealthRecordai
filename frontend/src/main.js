@@ -1,7 +1,8 @@
 const API = localStorage.getItem("healthApiUrl") || "http://127.0.0.1:8000";
+localStorage.removeItem("healthToken");
 const state = {
   active: "overview", records: [], timeline: [], analytics: { trends: [], signals: [] }, audit: [],
-  user: null, token: localStorage.getItem("healthToken") || "", loading: true,
+  user: null, token: "", loading: true,
   search: "", searchResults: [], conversationId: null, chat: [], literature: [],
 };
 const style = document.createElement("link"); style.rel = "stylesheet"; style.href = "/src/styles.css"; document.head.appendChild(style);
@@ -16,7 +17,7 @@ async function api(path, options = {}) {
   const headers = new Headers(options.headers || {});
   if (state.token) headers.set("Authorization", `Bearer ${state.token}`);
   if (options.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  const response = await fetch(`${API}${path}`, { ...options, headers });
+  const response = await fetch(`${API}${path}`, { ...options, headers, credentials: "include" });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     const detail = Array.isArray(body.detail)
@@ -68,7 +69,7 @@ function labelFor(view) { return ({ overview: "Overview", records: "My records",
 function bindShell() {
   document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => { state.active = button.dataset.view; render(); }));
   $("#chat-form").addEventListener("submit", sendChat);
-  $("#logout").addEventListener("click", () => { localStorage.removeItem("healthToken"); state.token = ""; state.user = null; renderAuth(); });
+  $("#logout").addEventListener("click", async () => { await api("/api/v1/auth/logout", { method: "POST" }).catch(() => {}); state.token = ""; state.user = null; renderAuth(); });
   $("#global-search").addEventListener("click", () => { state.active = "records"; render(); setTimeout(() => $("#record-search")?.focus(), 50); });
   $("#user-menu").addEventListener("click", () => showProfileMenu());
   document.querySelectorAll("[data-record]").forEach((button) => button.addEventListener("click", () => openRecord(button.dataset.record)));
@@ -142,7 +143,7 @@ async function openRecord(recordId) {
 }
 function toast(message) { const element = $("#toast"); if (!element) return; element.textContent = message; element.classList.add("show"); clearTimeout(window.toastTimer); window.toastTimer = setTimeout(() => element.classList.remove("show"), 3500); }
 
-function renderAuth() { document.querySelector("#app").innerHTML = `<main class="auth-page"><div class="auth-brand"><span class="brand-mark">+</span><strong>health record</strong></div><section class="auth-card"><span class="eyebrow">PRIVATE HEALTH WORKSPACE</span><h1>Make sense of the record you already have.</h1><p>Bring your reports together, follow changes over time, and ask grounded questions with your sources in view.</p><form id="auth-form"><label>Username<input id="auth-username" required minlength="3" autocomplete="username" /></label><label>Password<input id="auth-password" required minlength="8" type="password" autocomplete="current-password" /></label><button class="primary-button full" type="submit">Sign in ${icon("arrow")}</button><p class="auth-error" id="auth-error"></p></form><div class="auth-switch">New here? <button id="switch-auth">Create a workspace</button></div></section><div class="auth-note">${icon("lock")} Your information stays inside your configured health-record workspace.</div></main>`; let registering = false; $("#switch-auth").onclick = () => { registering = !registering; $("#switch-auth").textContent = registering ? "I already have an account" : "Create a workspace"; $("#auth-form .primary-button").innerHTML = registering ? `Create workspace ${icon("arrow")}` : `Sign in ${icon("arrow")}`; $(".auth-card h1").textContent = registering ? "Start with a private workspace." : "Make sense of the record you already have."; }; $("#auth-form").onsubmit = async (event) => { event.preventDefault(); const username = $("#auth-username").value, password = $("#auth-password").value; try { if (registering) await api("/api/v1/auth/register", { method: "POST", body: JSON.stringify({ username, password }) }); const form = new URLSearchParams({ username, password }); const result = await api("/api/v1/auth/token", { method: "POST", body: form, headers: { "Content-Type": "application/x-www-form-urlencoded" } }); state.token = result.access_token; localStorage.setItem("healthToken", state.token); state.user = await api("/api/v1/auth/me"); loadData(); } catch (error) { $("#auth-error").textContent = error.message; } }; }
+function renderAuth() { document.querySelector("#app").innerHTML = `<main class="auth-page"><div class="auth-brand"><span class="brand-mark">+</span><strong>health record</strong></div><section class="auth-card"><span class="eyebrow">PRIVATE HEALTH WORKSPACE</span><h1>Make sense of the record you already have.</h1><p>Bring your reports together, follow changes over time, and ask grounded questions with your sources in view.</p><form id="auth-form"><label>Username<input id="auth-username" required minlength="3" autocomplete="username" /></label><label>Password<input id="auth-password" required minlength="8" type="password" autocomplete="current-password" /></label><button class="primary-button full" type="submit">Sign in ${icon("arrow")}</button><p class="auth-error" id="auth-error"></p></form><div class="auth-switch">New here? <button id="switch-auth">Create a workspace</button></div></section><div class="auth-note">${icon("lock")} Your information stays inside your configured health-record workspace.</div></main>`; let registering = false; $("#switch-auth").onclick = () => { registering = !registering; $("#switch-auth").textContent = registering ? "I already have an account" : "Create a workspace"; $("#auth-form .primary-button").innerHTML = registering ? `Create workspace ${icon("arrow")}` : `Sign in ${icon("arrow")}`; $(".auth-card h1").textContent = registering ? "Start with a private workspace." : "Make sense of the record you already have."; }; $("#auth-form").onsubmit = async (event) => { event.preventDefault(); const username = $("#auth-username").value, password = $("#auth-password").value; try { if (registering) await api("/api/v1/auth/register", { method: "POST", body: JSON.stringify({ username, password }) }); const form = new URLSearchParams({ username, password }); await api("/api/v1/auth/token", { method: "POST", body: form, headers: { "Content-Type": "application/x-www-form-urlencoded" } }); state.user = await api("/api/v1/auth/me"); loadData(); } catch (error) { $("#auth-error").textContent = error.message; } }; }
 
-async function boot() { if (!state.token) return renderAuth(); try { state.user = await api("/api/v1/auth/me"); await loadData(); } catch { renderAuth(); } }
+async function boot() { try { state.user = await api("/api/v1/auth/me"); await loadData(); } catch { renderAuth(); } }
 boot();

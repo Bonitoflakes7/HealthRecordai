@@ -22,3 +22,18 @@ def test_authentication_and_patient_isolation(monkeypatch, tmp_path):
         events = client.get("/api/v1/audit", headers={"Authorization": f"Bearer {alice}"}).json()["events"]
         assert any(event["action"] == "record.upload" for event in events)
         assert first.status_code == 201 and second.status_code == 201
+
+
+def test_browser_auth_uses_http_only_cookie_and_logout_revokes_it(monkeypatch, tmp_path):
+    monkeypatch.setattr(config.settings, "data_dir", tmp_path)
+    monkeypatch.setattr(config.settings, "conversation_db_path", None)
+    monkeypatch.setattr(config.settings, "auth_enabled", True)
+    monkeypatch.setattr(config.settings, "auth_secret_key", "test-secret-key-012345678901234567890123")
+    with TestClient(app) as client:
+        client.post("/api/v1/auth/register", json={"username": "cookie-user", "password": "correct horse battery"})
+        token_response = client.post("/api/v1/auth/token", data={"username": "cookie-user", "password": "correct horse battery"})
+        assert "health_access_token=" in token_response.headers.get("set-cookie", "")
+        assert "HttpOnly" in token_response.headers.get("set-cookie", "")
+        assert client.get("/api/v1/auth/me").status_code == 200
+        assert client.post("/api/v1/auth/logout").status_code == 204
+        assert client.get("/api/v1/auth/me").status_code == 401

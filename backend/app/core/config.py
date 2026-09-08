@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     auth_enabled: bool = False
     auth_secret_key: str = "change-me-in-development"
     access_token_expire_minutes: int = 60
+    auth_cookie_name: str = "health_access_token"
+    auth_cookie_secure: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
