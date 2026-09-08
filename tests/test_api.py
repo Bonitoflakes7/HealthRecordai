@@ -83,7 +83,32 @@ def test_invalid_pdf_is_marked_failed(monkeypatch, tmp_path):
     monkeypatch.setattr(config.settings, "data_dir", tmp_path)
     with TestClient(app) as client:
         response = client.post("/api/v1/records", files={"file": ("report.pdf", BytesIO(b"%PDF-fake"), "application/pdf")})
-    assert response.status_code == 201
-    assert response.json()["status"] == "failed"
-    assert response.json()["source_type"] == "pdf"
-    assert response.json()["error"]
+    assert response.status_code == 400
+    assert "PDF" in response.json()["detail"]
+
+
+def test_upload_rejects_pdf_with_invalid_signature(monkeypatch, tmp_path):
+    monkeypatch.setattr(config.settings, "data_dir", tmp_path)
+    with TestClient(app) as client:
+        response = client.post("/api/v1/records", files={"file": ("report.pdf", BytesIO(b"not a pdf"), "application/pdf")})
+
+    assert response.status_code == 400
+    assert "signature" in response.json()["detail"]
+
+
+def test_upload_rejects_mismatched_image_signature(monkeypatch, tmp_path):
+    monkeypatch.setattr(config.settings, "data_dir", tmp_path)
+    with TestClient(app) as client:
+        response = client.post("/api/v1/records", files={"file": ("scan.png", BytesIO(b"plain text"), "image/png")})
+
+    assert response.status_code == 400
+    assert "signature" in response.json()["detail"]
+
+
+def test_upload_rejects_binary_text(monkeypatch, tmp_path):
+    monkeypatch.setattr(config.settings, "data_dir", tmp_path)
+    with TestClient(app) as client:
+        response = client.post("/api/v1/records", files={"file": ("notes.txt", BytesIO(b"hello\x00world"), "text/plain")})
+
+    assert response.status_code == 400
+    assert "binary" in response.json()["detail"]

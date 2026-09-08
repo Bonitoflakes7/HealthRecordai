@@ -9,7 +9,7 @@ from backend.app.models.literature import LiteratureAskRequest, LiteratureAskRes
 from backend.app.services.pubmed import LiteratureUnavailable
 from backend.app.services.safety import SafetyChecker
 from backend.app.models.schemas import HealthResponse, RecordDetail, RecordListResponse
-from backend.app.services.records import RecordStore
+from backend.app.services.records import RecordStore, UploadValidationError
 from backend.app.models.auth import AuditResponse, Token, User, UserRegistration
 from backend.app.services.security import create_access_token, decode_access_token
 
@@ -179,6 +179,8 @@ async def create_record(
     try:
         owner_id = user.id if request.app.state.settings.auth_enabled else "dev-user"
         summary = await store.save_upload(file, owner_id)
+    except UploadValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=413, detail=str(exc)) from exc
 

@@ -5,10 +5,15 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import UploadFile
+from pypdf import PdfReader
 
 from backend.app.core.config import settings
 from backend.app.models.schemas import RecordDetail, RecordSummary, SourceType
 from backend.app.models.clinical import NormalizedDocument
+
+
+class UploadValidationError(ValueError):
+    """Raised when an upload fails byte-level validation."""
 
 
 class RecordStore:
@@ -61,11 +66,18 @@ class RecordStore:
                     raise ValueError(f"file exceeds {settings.max_upload_mb} MB limit")
                 output.write(chunk)
 
+        try:
+            source_type = self._validate_upload(raw_path, filename, upload.content_type, size)
+        except UploadValidationError:
+            raw_path.unlink(missing_ok=True)
+            record_dir.rmdir()
+            raise
+
         now = datetime.now(timezone.utc)
         manifest = RecordSummary(
             id=record_id,
             filename=filename,
-            source_type=self._source_type(upload.content_type, filename),
+            source_type=source_type,
             mime_type=upload.content_type,
             size_bytes=size,
             status="uploaded",
@@ -109,14 +121,51 @@ class RecordStore:
         return Path(filename).name.replace("\x00", "_") or "unnamed-record"
 
     @staticmethod
-    def _source_type(mime_type: str | None, filename: str) -> SourceType:
-        if mime_type == "application/pdf" or filename.lower().endswith(".pdf"):
-            return "pdf"
-        if mime_type and mime_type.startswith("text/"):
-            return "text"
-        if mime_type and mime_type.startswith("image/"):
-            return "image"
-        return "unknown"
+    def _validate_upload(path: Path, filename: str, mime_type: str | None, size: int) -> SourceType:
+        if size == 0:
+            raise UploadValidationError("empty files are not allowed")
+        extension = Path(filename).suffix.casefold()
+        allowed = {".pdf": "pdf", ".txt": "text", ".md": "text", ".csv": "text", ".png": "image", ".jpg": "image", ".jpeg": "image", ".webp": "image"}
+        source_type = allowed.get(extension)
+        if source_type is None:
+            raise UploadValidationError("unsupported file type; upload a PDF, text file, or PNG/JPEG/WEBP image")
+        declared = (mime_type or "").casefold()
+        if source_type == "pdf":
+            signature = path.read_bytes()[:5]
+            if signature != b"%PDF-":
+                raise UploadValidationError("file extension is .pdf but the file signature is not a PDF")
+            try:
+                if not PdfReader(str(path)).pages:
+                    raise UploadValidationError("PDF contains no readable pages")
+            except UploadValidationError:
+                raise
+            except Exception as exc:
+                raise UploadValidationError("PDF structure could not be validated") from exc
+            if declared and declared not in {"application/pdf", "application/octet-stream"}:
+                raise UploadValidationError("PDF extension and declared content type do not match")
+        elif source_type == "image":
+            signature = path.read_bytes()[:12]
+            signatures = {
+                ".png": signature.startswith(b"\x89PNG\r\n\x1a\n"),
+                ".jpg": signature.startswith(b"\xff\xd8\xff"),
+                ".jpeg": signature.startswith(b"\xff\xd8\xff"),
+                ".webp": signature.startswith(b"RIFF") and signature[8:12] == b"WEBP",
+            }
+            if not signatures[extension]:
+                raise UploadValidationError("image extension does not match the file signature")
+            if declared and (not declared.startswith("image/") or (extension == ".png" and declared != "image/png") or (extension in {".jpg", ".jpeg"} and declared not in {"image/jpeg", "image/jpg"}) or (extension == ".webp" and declared != "image/webp")):
+                raise UploadValidationError("image extension and declared content type do not match")
+        else:
+            if declared and not (declared.startswith("text/") or declared == "application/octet-stream"):
+                raise UploadValidationError("text extension and declared content type do not match")
+            try:
+                content = path.read_bytes()
+                content.decode("utf-8-sig")
+            except UnicodeDecodeError as exc:
+                raise UploadValidationError("text files must be valid UTF-8") from exc
+            if b"\x00" in content:
+                raise UploadValidationError("binary content is not allowed in text uploads")
+        return source_type
 
     @staticmethod
     def _read_manifest(path: Path) -> RecordSummary:
