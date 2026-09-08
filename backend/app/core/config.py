@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
     auth_cookie_name: str = "health_access_token"
     auth_cookie_secure: bool = False
+    semantic_retrieval_enabled: bool = False
+    semantic_retrieval_weight: float = 0.35
+    semantic_model_name: str = "all-MiniLM-L6-v2"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

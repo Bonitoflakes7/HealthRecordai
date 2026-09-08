@@ -96,7 +96,7 @@ def search_records(
 ) -> SearchResponse:
     results = request.app.state.rag_index.search(q, record_id=record_id, limit=limit, owner_id=user.id if request.app.state.settings.auth_enabled else None)
     request.app.state.audit_store.record(user.id, "record.search", "record", record_id, metadata={"query_length": len(q), "result_count": len(results)})
-    return SearchResponse(query=q, results=results)
+    return SearchResponse(query=q, results=results, retrieval_mode=request.app.state.rag_index.retrieval_mode)
 
 
 @router.post("/api/v1/ask", response_model=AskResponse)
@@ -123,6 +123,7 @@ def ask_records(payload: AskRequest, request: Request, user: User = Depends(curr
         evidence=result.get("evidence", {}),
         query_intent=result.get("query_intent", "general"),
         citation_validation=result.get("citation_validation", {}),
+        retrieval_mode=result.get("retrieval_mode", request.app.state.rag_index.retrieval_mode),
     )
 
 

@@ -11,10 +11,27 @@ from backend.app.models.retrieval import EvidenceMetadata, SearchResult
 class LocalRecordIndex:
     """Small persistent lexical index with LangChain-compatible Documents and citations."""
 
-    def __init__(self, root: Path | None = None, chunk_size: int = 900) -> None:
+    def __init__(self, root: Path | None = None, chunk_size: int = 900, semantic_model=None) -> None:
         self.index_path = (root or settings.data_dir / "rag" / "chunks.json").resolve()
         self.index_path.parent.mkdir(parents=True, exist_ok=True)
         self.chunk_size = chunk_size
+        self.semantic_model = semantic_model if semantic_model is not None else self._load_semantic_model()
+        self._semantic_cache: dict[str, list[float]] = {}
+
+    @property
+    def retrieval_mode(self) -> str:
+        return "hybrid" if self.semantic_model is not None else "lexical"
+
+    @staticmethod
+    def _load_semantic_model():
+        if not settings.semantic_retrieval_enabled:
+            return None
+        try:
+            from sentence_transformers import SentenceTransformer
+
+            return SentenceTransformer(settings.semantic_model_name)
+        except (ImportError, OSError, RuntimeError, ValueError):
+            return None
 
     def index_record(self, record_id: str, filename: str, text: str, owner_id: str = "dev-user", document_date: str | None = None, document_type: str | None = None, page_texts: list[str] | None = None) -> int:
         documents = self._chunk(record_id, filename, text, owner_id, document_date, document_type, page_texts)
@@ -25,9 +42,10 @@ class LocalRecordIndex:
 
     def search(self, query: str, record_id: str | None = None, limit: int = 5, owner_id: str | None = None) -> list[SearchResult]:
         terms = self._tokens(query)
-        if not terms:
+        if not terms and self.semantic_model is None:
             return []
         phrase = query.casefold().strip()
+        query_vector = self._encode(query) if self.semantic_model is not None else None
         ranked: list[tuple[float, dict]] = []
         for item in self._read():
             metadata = item["metadata"]
@@ -38,11 +56,16 @@ class LocalRecordIndex:
             content = item["page_content"]
             content_terms = self._tokens(content)
             matched = sum(term in content_terms for term in terms)
-            if not matched:
+            lexical_score = matched / len(terms) if terms else 0.0
+            semantic_score = self._cosine(query_vector, self._document_vector(item)) if query_vector is not None else 0.0
+            if not matched and semantic_score < 0.15:
                 continue
-            score = matched / len(terms)
+            score = lexical_score
             if phrase and phrase in content.casefold():
                 score += 0.5
+            if self.semantic_model is not None:
+                weight = min(1.0, max(0.0, settings.semantic_retrieval_weight))
+                score = ((1 - weight) * min(score, 1.0)) + (weight * semantic_score)
             ranked.append((score, item))
 
         ranked.sort(key=lambda value: value[0], reverse=True)
@@ -64,6 +87,22 @@ class LocalRecordIndex:
                 )
             )
         return results
+
+    def _encode(self, text: str) -> list[float]:
+        encoded = self.semantic_model.encode([text], normalize_embeddings=True)[0]
+        return [float(value) for value in (encoded.tolist() if hasattr(encoded, "tolist") else encoded)]
+
+    def _document_vector(self, item: dict) -> list[float]:
+        key = f"{item['metadata'].get('record_id')}#{item['metadata'].get('chunk_index')}"
+        if key not in self._semantic_cache:
+            self._semantic_cache[key] = self._encode(item["page_content"])
+        return self._semantic_cache[key]
+
+    @staticmethod
+    def _cosine(left: list[float] | None, right: list[float]) -> float:
+        if not left or not right or len(left) != len(right):
+            return 0.0
+        return max(-1.0, min(1.0, sum(a * b for a, b in zip(left, right))))
 
     def search_all(self, owner_id: str | None = None, limit: int = 60) -> tuple[list[SearchResult], EvidenceMetadata]:
         """Return a date-ordered evidence set for longitudinal questions."""

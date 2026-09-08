@@ -50,3 +50,24 @@ def test_index_search_returns_source_page_for_page_aware_records(tmp_path):
 
     result = index.search("Ibuprofen")[0]
     assert result.source_page == 2
+
+
+def test_index_defaults_to_lexical_mode(tmp_path):
+    index = LocalRecordIndex(tmp_path / "chunks.json")
+
+    assert index.retrieval_mode == "lexical"
+
+
+def test_hybrid_mode_can_retrieve_semantically_similar_text(tmp_path):
+    class FakeSemanticModel:
+        def encode(self, texts, normalize_embeddings=True):
+            return [[1.0, 0.0] if any(term in texts[0].casefold() for term in ("glucose", "glycemic", "sugar")) else [0.0, 1.0]]
+
+    index = LocalRecordIndex(tmp_path / "chunks.json", semantic_model=FakeSemanticModel())
+    index.index_record("record-1", "lab.txt", "Glucose levels were documented.")
+    index.index_record("record-2", "note.txt", "The patient discussed sleep habits.")
+
+    results = index.search("glycemic control")
+
+    assert index.retrieval_mode == "hybrid"
+    assert results[0].record_id == "record-1"

@@ -17,6 +17,7 @@ class SearchResult(BaseModel):
 class SearchResponse(BaseModel):
     query: str
     results: list[SearchResult] = Field(default_factory=list)
+    retrieval_mode: str = "lexical"
 
 
 class EvidenceMetadata(BaseModel):

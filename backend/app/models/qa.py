@@ -22,3 +22,4 @@ class AskResponse(BaseModel):
     evidence: EvidenceMetadata = Field(default_factory=EvidenceMetadata)
     query_intent: str = "general"
     citation_validation: CitationValidation = Field(default_factory=CitationValidation)
+    retrieval_mode: str = "lexical"

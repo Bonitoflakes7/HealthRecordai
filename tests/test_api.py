@@ -61,6 +61,7 @@ def test_search_returns_citation_for_extracted_text(monkeypatch, tmp_path):
         response = client.get("/api/v1/search", params={"q": "persistent fatigue"})
     assert response.status_code == 200
     assert response.json()["results"][0]["citation_id"].endswith("#chunk-0")
+    assert response.json()["retrieval_mode"] == "lexical"
 
 
 def test_ask_returns_grounded_fallback(monkeypatch, tmp_path):

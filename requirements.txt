@@ -10,3 +10,4 @@ langchain-google-genai
 pytest
 pyjwt
 pwdlib[argon2]
+sentence-transformers

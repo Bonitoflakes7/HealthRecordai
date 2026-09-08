@@ -38,6 +38,7 @@ class QAState(TypedDict, total=False):
     query_intent: str
     query_focus: str
     citation_validation: dict
+    retrieval_mode: str
 
 
 def build_qa_graph(index: LocalRecordIndex, answerer: GroundedAnswerer, safety_checker: SafetyChecker | None = None):
@@ -60,11 +61,12 @@ def build_qa_graph(index: LocalRecordIndex, answerer: GroundedAnswerer, safety_c
 
     def retrieve(state: QAState) -> QAState:
         owner_id = state.get("owner_id")
+        retrieval_mode = getattr(index, "retrieval_mode", "lexical")
         if state.get("record_id") is None and (state.get("query_intent") == "longitudinal" or is_longitudinal_question(state["question"])):
             results, evidence = index.search_all(owner_id=owner_id, limit=60)
-            return {"results": results, "evidence": evidence}
+            return {"results": results, "evidence": evidence, "retrieval_mode": retrieval_mode}
         results = index.search(state["question"], record_id=state.get("record_id"), limit=state.get("limit", 5), owner_id=owner_id)
-        return {"results": results, "evidence": EvidenceMetadata(records_available=len({item.record_id for item in results}), records_retrieved=len({item.record_id for item in results}), complete=True)}
+        return {"results": results, "evidence": EvidenceMetadata(records_available=len({item.record_id for item in results}), records_retrieved=len({item.record_id for item in results}), complete=True), "retrieval_mode": retrieval_mode}
 
     def answer(state: QAState) -> QAState:
         text, mode = answerer.answer(state["question"], state.get("results", []), state.get("history", []), evidence=state.get("evidence"), query_intent=state.get("query_intent"), query_focus=state.get("query_focus"))
