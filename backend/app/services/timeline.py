@@ -24,6 +24,10 @@ class TimelineService:
                     document_type=document.document_type,
                     title=document.title,
                     observations=document.observations,
+                    conditions=document.conditions,
+                    medications=document.medications,
+                    investigations=document.investigations,
+                    procedures=document.procedures,
                 )
             )
         events.sort(key=lambda event: event.event_date or date.min, reverse=True)

@@ -31,3 +31,23 @@ def test_normalizer_handles_markdown_consultation_report():
     assert str(document.document_date) == "2026-09-07"
     assert document.observations[0].name == "heart_rate"
     assert document.sections[0].heading == "SAMPLE MEDICAL CONSULTATION REPORT"
+
+
+def test_normalizer_extracts_rich_clinical_items_conservatively():
+    document = DocumentNormalizer().normalize(
+        "record-4",
+        "SAMPLE MEDICAL RECORD\nDate: 19 January 2025\n"
+        "Assessment\nPersistent hyperlipidemia with elevated cardiovascular risk.\n"
+        "Medication Started\nAtorvastatin 10 mg once daily, as prescribed by the physician.\n"
+        "Monitoring\nLipid panel and liver function testing recommended after initiation.\n"
+        "Procedures\nNo procedures performed.",
+    )
+
+    assert document.conditions[0].name.startswith("Persistent hyperlipidemia")
+    assert document.conditions[0].status == "active"
+    assert document.medications[0].name == "Atorvastatin"
+    assert document.medications[0].dose == "10 mg"
+    assert document.medications[0].action == "started"
+    assert document.medications[0].status == "active"
+    assert document.investigations[0].status == "recommended"
+    assert document.procedures == []

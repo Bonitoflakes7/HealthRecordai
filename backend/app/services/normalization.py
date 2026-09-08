@@ -1,7 +1,7 @@
 import re
 from datetime import date, datetime
 
-from backend.app.models.clinical import DocumentSection, DocumentType, NormalizedDocument, Observation
+from backend.app.models.clinical import Condition, DocumentSection, DocumentType, Investigation, Medication, NormalizedDocument, Observation, Procedure
 
 
 class DocumentNormalizer:
@@ -26,6 +26,10 @@ class DocumentNormalizer:
             document_date=self._first_date(cleaned),
             sections=self._sections(cleaned),
             observations=self._observations(cleaned),
+            conditions=self._conditions(cleaned),
+            medications=self._medications(cleaned),
+            investigations=self._investigations(cleaned),
+            procedures=self._procedures(cleaned),
         )
 
     @staticmethod
@@ -72,7 +76,8 @@ class DocumentNormalizer:
             line = raw_line.strip()
             clean_line = re.sub(r"[*_`]", "", line).strip()
             is_markdown_heading = line.startswith("**") and line.endswith("**")
-            is_heading = bool(clean_line) and (is_markdown_heading or clean_line.endswith(":") or (clean_line.isupper() and len(clean_line) <= 80))
+            known_heading = bool(re.fullmatch(r"(?:date of visit|visit date|reason for visit|chief complaint|vital signs|assessment|diagnosis|diagnoses|problem list|impression|medication(?:s)?(?: started| prescribed| list)?|prescription(?:s)?|treatment|additional advice|monitoring|investigations?|lab(?:oratory)? results?|test results?|procedures?|plan|follow[- ]?up|disposition)", clean_line, re.I))
+            is_heading = bool(clean_line) and (is_markdown_heading or known_heading or clean_line.endswith(":") or (clean_line.isupper() and len(clean_line) <= 80))
             if is_heading:
                 if heading and "\n".join(body).strip():
                     sections.append(DocumentSection(heading=heading.rstrip(": "), text="\n".join(body).strip()))
@@ -107,3 +112,82 @@ class DocumentNormalizer:
                 Observation(name=name, value=value, unit=unit, observed_on=observed_on, source_text=match.group(0))
             )
         return observations
+
+    @classmethod
+    def _conditions(cls, text: str) -> list[Condition]:
+        items: list[Condition] = []
+        for section in cls._sections(text):
+            heading, body = section.heading, section.text
+            if not re.search(r"assessment|diagnos|problem|impression", heading, re.I):
+                continue
+            for line in cls._clean_lines(body):
+                if len(line) > 240 or re.search(r"^(none|normal|unremarkable|no diagnosis)\b", line, re.I):
+                    continue
+                status = "active" if re.search(r"persistent|ongoing|active|current", line, re.I) else "documented"
+                items.append(Condition(name=line.rstrip(".;"), status=status, source_text=line))
+        return cls._unique(items, lambda item: item.name.casefold())
+
+    @classmethod
+    def _medications(cls, text: str) -> list[Medication]:
+        items: list[Medication] = []
+        medication_line = re.compile(r"\b([A-Z][A-Za-z-]{2,})\s+(\d+(?:\.\d+)?\s*(?:mg|mcg|g|ml)(?:/\w+)?)\b([^\n.;]*)", re.I)
+        for raw_line in text.splitlines():
+            line = re.sub(r"^[\s•*\-]+", "", raw_line).strip()
+            if not line or not re.search(r"medication|prescri|dosage|\bstarted\b|\bcontinue\b|\btreated\b|\btablet\b", line, re.I):
+                continue
+            match = medication_line.search(line)
+            if not match:
+                continue
+            name, dose, remainder = match.groups()
+            action = "started" if re.search(r"medication\s+started|started\s+medication|initiat", text, re.I) else "prescribed" if re.search(r"prescri|dosage", line, re.I) else "continued" if re.search(r"continue", line, re.I) else "documented"
+            status = "not_started" if re.search(r"not started|did not start", line, re.I) else "active" if action in {"started", "continued"} else "unknown"
+            frequency_match = re.search(r"\b(once|twice|three times|every\s+\w+|as needed|daily|weekly)[^,.;]*", remainder, re.I)
+            items.append(Medication(name=name, dose=dose, frequency=frequency_match.group(0).strip() if frequency_match else None, action=action, status=status, source_text=line))
+        return cls._unique(items, lambda item: (item.name.casefold(), item.dose, item.source_text.casefold()))
+
+    @classmethod
+    def _investigations(cls, text: str) -> list[Investigation]:
+        items: list[Investigation] = []
+        keywords = r"blood test|lab(?:oratory)?|cbc|lipid|glucose|hba1c|creatinine|liver function|imaging|x-ray|mri|ct scan|ultrasound|specimen"
+        for section in cls._sections(text):
+            heading, body = section.heading, section.text
+            if re.search(r"assessment|diagnos|problem|impression", heading, re.I):
+                continue
+            section_match = re.search(r"investig|monitor|lab|\btests?\b|\bresults?\b|examination", heading, re.I)
+            for line in cls._clean_lines(body):
+                if not section_match and not re.search(keywords, line, re.I):
+                    continue
+                if not re.search(keywords, line, re.I):
+                    continue
+                status = "recommended" if re.search(r"recommend|follow[- ]?up|plan|ordered", line, re.I) else "resulted" if re.search(r"result|value|was\s+\d", line, re.I) else "documented"
+                items.append(Investigation(name=line.rstrip(".;"), status=status, source_text=line))
+        return cls._unique(items, lambda item: item.name.casefold())
+
+    @classmethod
+    def _procedures(cls, text: str) -> list[Procedure]:
+        items: list[Procedure] = []
+        for section in cls._sections(text):
+            heading, body = section.heading, section.text
+            if not re.search(r"procedure|surgery|operation|intervention", heading, re.I):
+                continue
+            for line in cls._clean_lines(body):
+                if re.search(r"^(none|no procedures?|not performed)\b", line, re.I):
+                    continue
+                status = "planned" if re.search(r"planned|scheduled|recommended", line, re.I) else "performed" if re.search(r"performed|underwent|completed", line, re.I) else "documented"
+                items.append(Procedure(name=line.rstrip(".;"), status=status, source_text=line))
+        return cls._unique(items, lambda item: item.name.casefold())
+
+    @staticmethod
+    def _clean_lines(text: str) -> list[str]:
+        return [re.sub(r"^[\s•*\-]+", "", line).strip() for line in text.splitlines() if re.sub(r"^[\s•*\-]+", "", line).strip()]
+
+    @staticmethod
+    def _unique(items, key):
+        seen = set()
+        unique = []
+        for item in items:
+            marker = key(item)
+            if marker not in seen:
+                seen.add(marker)
+                unique.append(item)
+        return unique
