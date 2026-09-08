@@ -5,7 +5,7 @@ from pathlib import Path
 from langchain_core.documents import Document
 
 from backend.app.core.config import settings
-from backend.app.models.retrieval import SearchResult
+from backend.app.models.retrieval import EvidenceMetadata, SearchResult
 
 
 class LocalRecordIndex:
@@ -64,15 +64,26 @@ class LocalRecordIndex:
             )
         return results
 
-    def search_all(self, owner_id: str | None = None, limit: int = 60) -> list[SearchResult]:
+    def search_all(self, owner_id: str | None = None, limit: int = 60) -> tuple[list[SearchResult], EvidenceMetadata]:
         """Return a date-ordered evidence set for longitudinal questions."""
         items = [item for item in self._read() if owner_id is None or item["metadata"].get("owner_id") == owner_id]
+        record_ids = {item["metadata"].get("record_id") for item in items}
+        dates = sorted({item["metadata"].get("document_date") for item in items if item["metadata"].get("document_date")})
         items.sort(key=lambda item: (item["metadata"].get("document_date") or "9999-12-31", item["metadata"].get("record_id", "")))
         results: list[SearchResult] = []
         for item in items[: max(1, min(limit, 100))]:
             metadata = item["metadata"]
             results.append(SearchResult(citation_id=f"{metadata['record_id']}#chunk-{int(metadata['chunk_index'])}", record_id=metadata["record_id"], filename=metadata["filename"], chunk_index=int(metadata["chunk_index"]), content=item["page_content"], score=1.0, document_date=metadata.get("document_date"), document_type=metadata.get("document_type")))
-        return results
+        latest = next((item for item in reversed(items) if item["metadata"].get("document_date")), None)
+        metadata = EvidenceMetadata(
+            records_available=len(record_ids),
+            records_retrieved=len({item.record_id for item in results}),
+            complete=len(record_ids) <= max(1, limit),
+            earliest_record_date=dates[0] if dates else None,
+            latest_record_date=latest["metadata"].get("document_date") if latest else None,
+            latest_record_id=latest["metadata"].get("record_id") if latest else None,
+        )
+        return results, metadata
 
     def _chunk(self, record_id: str, filename: str, text: str, owner_id: str, document_date: str | None, document_type: str | None) -> list[Document]:
         cleaned = re.sub(r"\s+", " ", text).strip()

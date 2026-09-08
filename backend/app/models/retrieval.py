@@ -16,3 +16,12 @@ class SearchResult(BaseModel):
 class SearchResponse(BaseModel):
     query: str
     results: list[SearchResult] = Field(default_factory=list)
+
+
+class EvidenceMetadata(BaseModel):
+    records_available: int = 0
+    records_retrieved: int = 0
+    complete: bool = True
+    earliest_record_date: str | None = None
+    latest_record_date: str | None = None
+    latest_record_id: str | None = None

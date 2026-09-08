@@ -29,6 +29,17 @@ async def lifespan(app: FastAPI):
     app.state.audit_store = AuditStore(database_path)
     app.state.ingestion_graph = build_ingestion_graph(DocumentExtractor(), DocumentNormalizer())
     app.state.rag_index = LocalRecordIndex()
+    for summary in app.state.record_store.list_records():
+        detail = app.state.record_store.get_record(summary.id)
+        if detail and detail.text:
+            app.state.rag_index.index_record(
+                summary.id,
+                summary.filename,
+                detail.text,
+                summary.owner_id or "dev-user",
+                document_date=detail.structured.document_date.isoformat() if detail.structured and detail.structured.document_date else None,
+                document_type=detail.structured.document_type if detail.structured else None,
+            )
     app.state.qa_graph = build_qa_graph(app.state.rag_index, configured_answerer())
     app.state.timeline_service = TimelineService(app.state.record_store)
     app.state.analytics_service = ClinicalAnalyticsService(app.state.record_store)

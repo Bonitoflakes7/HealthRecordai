@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from backend.app.models.retrieval import SearchResult
+from backend.app.models.retrieval import EvidenceMetadata, SearchResult
 
 
 class AskRequest(BaseModel):
@@ -18,3 +18,4 @@ class AskResponse(BaseModel):
     conversation_id: str
     safety_level: str = "normal"
     safety_flags: list[str] = Field(default_factory=list)
+    evidence: EvidenceMetadata = Field(default_factory=EvidenceMetadata)

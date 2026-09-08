@@ -2,7 +2,7 @@ from typing_extensions import TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from backend.app.models.retrieval import SearchResult
+from backend.app.models.retrieval import EvidenceMetadata, SearchResult
 from backend.app.services.answering import GroundedAnswerer
 from backend.app.services.retrieval import LocalRecordIndex
 from backend.app.services.safety import SafetyChecker
@@ -32,6 +32,7 @@ class QAState(TypedDict, total=False):
     safety_flags: list[str]
     safety_message: str | None
     owner_id: str | None
+    evidence: EvidenceMetadata
 
 
 def build_qa_graph(index: LocalRecordIndex, answerer: GroundedAnswerer, safety_checker: SafetyChecker | None = None):
@@ -51,11 +52,13 @@ def build_qa_graph(index: LocalRecordIndex, answerer: GroundedAnswerer, safety_c
     def retrieve(state: QAState) -> QAState:
         owner_id = state.get("owner_id")
         if state.get("record_id") is None and is_longitudinal_question(state["question"]):
-            return {"results": index.search_all(owner_id=owner_id, limit=60)}
-        return {"results": index.search(state["question"], record_id=state.get("record_id"), limit=state.get("limit", 5), owner_id=owner_id)}
+            results, evidence = index.search_all(owner_id=owner_id, limit=60)
+            return {"results": results, "evidence": evidence}
+        results = index.search(state["question"], record_id=state.get("record_id"), limit=state.get("limit", 5), owner_id=owner_id)
+        return {"results": results, "evidence": EvidenceMetadata(records_available=len({item.record_id for item in results}), records_retrieved=len({item.record_id for item in results}), complete=True)}
 
     def answer(state: QAState) -> QAState:
-        text, mode = answerer.answer(state["question"], state.get("results", []), state.get("history", []))
+        text, mode = answerer.answer(state["question"], state.get("results", []), state.get("history", []), evidence=state.get("evidence"))
         return {"answer": text, "mode": mode}
 
     builder = StateGraph(QAState)

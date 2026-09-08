@@ -26,3 +26,19 @@ def test_numeric_only_query_does_not_create_false_match(tmp_path):
     index.index_record("record-1", "notes.txt", "The visit lasted 5 minutes.")
 
     assert index.search("5") == []
+
+
+def test_longitudinal_search_returns_deterministic_completeness_metadata(tmp_path):
+    index = LocalRecordIndex(tmp_path / "chunks.json")
+    index.index_record("record-1", "jan.txt", "Back pain visit.", document_date="2024-01-14", document_type="clinical_note")
+    index.index_record("record-2", "mar.txt", "Glucose 118.", document_date="2025-03-11", document_type="lab_report")
+
+    results, metadata = index.search_all(limit=60)
+
+    assert [item.record_id for item in results] == ["record-1", "record-2"]
+    assert metadata.records_available == 2
+    assert metadata.records_retrieved == 2
+    assert metadata.complete is True
+    assert metadata.earliest_record_date == "2024-01-14"
+    assert metadata.latest_record_date == "2025-03-11"
+    assert metadata.latest_record_id == "record-2"
