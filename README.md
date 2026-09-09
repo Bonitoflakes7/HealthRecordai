@@ -52,10 +52,10 @@ The project addresses these problems with a staged pipeline that keeps the origi
                                     v
                          +----------+-----------+
                          | FastAPI API          |
-                         | auth, records, ask  |
+                         | auth, records, ask   |
                          +----+-----------+-----+
                               |           |
-              upload         |           | question
+              upload          |           | question
                               v           v
                  +------------+--+   +---+----------------+
                  | LangGraph     |   | LangGraph QA       |
@@ -64,10 +64,10 @@ The project addresses these problems with a staged pipeline that keeps the origi
                  | normalize     |   +---+----------------+
                  +-------+-------+       |
                          |               v
-                         v       +-------+--------+
-                 +-------+------+| Local RAG index|
-                 | records store || chunks.json     |
-                 | raw + text +  |+----------------+
+                         v           +-------+--------+
+                 +-------+------+    | Local RAG index|
+                 | records store |   | chunks.json    |
+                 | raw + text +  |   +----------------+
                  | structured JSON|
                  +-------+-------+
                          |
